@@ -64,8 +64,8 @@ PERIFLIB_SOURCES =
 #######################################
 # binaries
 #######################################
-PREFIX = 
-PREFIX += arm-none-eabi-
+#PREFIX = arm-none-eabi-
+PREFIX = /home/slonegd/Code/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-
 #CC = $(BINPATH)/$(PREFIX)gcc
 CC = $(PREFIX)gcc
 AS = $(PREFIX)gcc -x assembler-with-cpp
@@ -172,6 +172,9 @@ $(BUILD_DIR):
 #######################################
 clean:
 	-rm -fR .dep $(BUILD_DIR)
+
+flash_stlink: 
+	st-flash write $(BUILD_DIR)/$(PROJECT).bin 0x8000000
   
 #######################################
 # dependencies
