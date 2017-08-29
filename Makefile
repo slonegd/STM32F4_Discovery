@@ -31,9 +31,11 @@ OPT = -O2
 # source path
 SOURCES_DIR =  \
 Application \
-Drivers/CMSIS \
-Application/MAKEFILE \
-Drivers
+inc \
+inc/CMSIS \
+src \
+src/usrlib
+
 
 # firmware library path
 PERIFLIB_PATH = 
@@ -47,12 +49,13 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 inc/system_stm32f4xx.c \
-main.c \
+src/main.c \
+src/usrlib/stm32f4_deb.c
  
 
 # ASM sources
 ASM_SOURCES =  \
-startup_stm32f405xx.s
+startup/startup_stm32f405xx.s
 
 
 ######################################
@@ -127,7 +130,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
 # LDFLAGS
 #######################################
 # link script
-LDSCRIPT = STM32F405RGTx_FLASH.ld
+LDSCRIPT = linker/STM32F405RGTx_FLASH.ld
 
 # libraries
 LIBS = -lc -lm -lnosys
@@ -174,7 +177,7 @@ clean:
 	-rm -fR .dep $(BUILD_DIR)
 
 flash_stlink: 
-	st-flash write $(BUILD_DIR)/$(PROJECT).bin 0x8000000
+	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
   
 #######################################
 # dependencies

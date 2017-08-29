@@ -9,7 +9,7 @@
 		 // slonegd note
 		 // "miDebuggerPath": "/home/slonegd/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/arm-none-eabi-gdb",
 		 // work note
-		 	"miDebuggerPath": "/home/slonegd/Code/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-gdb",
+		 	"miDebuggerPath": "/home/ap/Code/gcc-arm-none-eabi-6-2017-q1-update/bin/arm-none-eabi-gdb",
 			"args": [
 				"-tui"
 			],
