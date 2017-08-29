@@ -46,8 +46,8 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
-Src/system_stm32f4xx.c \
-Src/main.c \
+inc/system_stm32f4xx.c \
+main.c \
  
 
 # ASM sources
@@ -64,8 +64,8 @@ PERIFLIB_SOURCES =
 #######################################
 # binaries
 #######################################
-#PREFIX = arm-none-eabi-
-PREFIX = /home/slonegd/Code/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-
+PREFIX = arm-none-eabi-
+#PREFIX = /home/slonegd/Code/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-
 #CC = $(BINPATH)/$(PREFIX)gcc
 CC = $(PREFIX)gcc
 AS = $(PREFIX)gcc -x assembler-with-cpp
@@ -104,9 +104,9 @@ AS_INCLUDES =
 
 # C includes
 C_INCLUDES =  \
--IInc \
--IDrivers/CMSIS/Device/ST/STM32F4xx/Include \
--IDrivers/CMSIS/Include
+-Iinc \
+-Iinc/CMSIS 
+
 
 
 # compile gcc flags
