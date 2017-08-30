@@ -1,5 +1,12 @@
+/**
+ * Файл с определениями битовых полей регистров
+ * bf - bit fields
+ */
 #include <stdint.h>
 #include "../inc/stm32f4xx.h"
+
+#ifndef STM32F4_BF_H
+#define STM32F4_BF_H
 
 /*****************************************************************************
  *		RCC
@@ -89,7 +96,7 @@ typedef struct {
 	// 1111: system clock divided by 512
 	uint32_t HPRE	:4;
 	// Bits 9:8 Reserved, must be kept at reset value.
-	uint32_t dcb1	:1;
+	uint32_t dcb1	:2;
 	// Bits 12:10 PPRE1: APB Low speed prescaler (APB1)
 	// 0xx: AHB clock not divided
 	// 100: AHB clock divided by 2
@@ -154,3 +161,5 @@ typedef struct {
 	// Bits 31:13 Reserved, must be kept cleared.
 	uint32_t dcb2		:19;
 } FLASH_ACR_t;
+
+#endif // STM32F4_BF_H

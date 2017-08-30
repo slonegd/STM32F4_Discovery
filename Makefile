@@ -50,7 +50,7 @@ BUILD_DIR = build
 C_SOURCES =  \
 inc/system_stm32f4xx.c \
 src/main.c \
-src/usrlib/stm32f4_deb.c
+src/usrlib/stm32f4_bf.c
  
 
 # ASM sources
