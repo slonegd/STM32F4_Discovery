@@ -1,13 +1,16 @@
 #include <stdint.h>
 #include "usrlib/stm32f4_bf.h"
 #include "usrlib/stm32f4_llul.h"
+#include "usrlib/timer.h"
 
 #ifndef INIT_H
 #define INIT_H
 
-inline void InitCLK (void)
+
+
+inline void CLKinit (void)
 {
-    FLASH_SetLatency (latency_5);
+	FLASH_SetLatency (latency_5);
 	RCC_HSEon ();
 	RCC_WaitHSEready ();
 	RCC_SetAHBprescaler (AHBnotdiv);
@@ -21,6 +24,12 @@ inline void InitCLK (void)
 	RCC_SetPLLsource (HSEsource);
 	RCC_PLLon ();
 	RCC_WaitPLLready ();
+}
+
+inline void TimeEventInit (void)
+{
+	TimerSetTime (test, 500);
+	TimerStart (test);
 }
 
 #endif // INIT_H

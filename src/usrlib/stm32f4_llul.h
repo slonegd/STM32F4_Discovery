@@ -73,11 +73,6 @@ inline void RCC_SetAPB2prescaler (volatile eAPBprescaler_t APB2prescaler)
 	RCC_CFGR->PPRE2 = APB2prescaler;
 }
 
-	// Bits 1:0 SW: System clock switch
-	// 00: HSI oscillator selected as system clock
-	// 01: HSE oscillator selected as system clock
-	// 10: PLL selected as system clock
-	// 11: not allowed
 typedef enum {
 	HSI		= 0,
 	HSE		= 0b01,
