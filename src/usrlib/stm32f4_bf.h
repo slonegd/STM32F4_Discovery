@@ -138,6 +138,157 @@ typedef struct {
 	uint32_t MCO2	:2;
 } RCC_CFGR_t;
 
+typedef struct {
+	// Bit 0 GPIOAEN: IO port A clock enable
+	uint32_t GPIOAEN	:1;
+	// Bit 1 GPIOBEN: IO port B clock enable
+	uint32_t GPIOBEN	:1;
+	// Bit 2 GPIOCEN: IO port C clock enable
+	uint32_t GPIOCEN	:1;
+	// Bit 3 GPIODEN: IO port D clock enable
+	uint32_t GPIODEN	:1;
+	// Bit 4 GPIOEEN: IO port E clock enable
+	uint32_t GPIOEEN	:1;
+	// Bit 5 GPIOFEN: IO port F clock enable
+	uint32_t GPIOFEN	:1;
+	// Bit 6 GPIOGEN: IO port G clock enable
+	uint32_t GPIOGEN	:1;
+	// Bit 7 GPIOHEN: IO port H clock enable
+	uint32_t GPIOHEN	:1;
+	// Bit 8 GPIOIEN: IO port I clock enable
+	uint32_t GPIOIEN	:1;
+	// Bits 11:9 Reserved, must be kept at reset value.
+	uint32_t dcb1		:3;
+	// Bit 12 CRCEN: CRC clock enable
+	uint32_t CRCEN		:1;
+	// Bits 17:13 Reserved, must be kept at reset value.
+	uint32_t dcb2		:5;
+	// Bit 18 BKPSRAMEN: Backup SRAM interface clock enable
+	uint32_t BKPSRAMEN	:1;
+	// Bit 19 Reserved, must be kept at reset value.
+	uint32_t dcb3		:1;
+	// Bit 20 CCMDATARAMEN: CCM data RAM clock enable
+	uint32_t CCMDATARAMEN	:1;
+	// Bit 21 DMA1EN: DMA1 clock enable
+	uint32_t DMA1EN		:1;
+	// Bit 22 DMA2EN: DMA2 clock enable
+	uint32_t DMA2EN		:1;
+	// Bits 24:23 Reserved, must be kept at reset value.
+	uint32_t dcb4		:2;
+	// Bit 25 ETHMACEN: Ethernet MAC clock enable
+	uint32_t ETHMACEN	:1;
+	// Bit 26 ETHMACTXEN: Ethernet Transmission clock enable
+	uint32_t ETHMACTXEN	:1;
+	// Bit 27 ETHMACRXEN: Ethernet Reception clock enable
+	uint32_t ETHMACRXEN	:1;
+	// Bit 28 ETHMACPTPEN: Ethernet PTP clock enable
+	uint32_t ETHMACPTPEN	:1;
+	// Bit 29 OTGHSEN: USB OTG HS clock enable
+	uint32_t OTGHSEN	:1;
+	// Bit 30 OTGHSULPIEN: USB OTG HSULPI clock enable
+	uint32_t OTGHSULPIEN	:1;
+	// Bit 31 Reserved, must be kept at reset value.
+	uint32_t dcb5		:1;
+} RCC_AHB1ENR_t;
+
+
+/*****************************************************************************
+ *		GPIO
+ ****************************************************************************/
+ typedef struct {
+	// Bits 2y:2y+1 MODERy[1:0]: Port x configuration bits (y = 0..15)
+	// 00: Input (reset state)
+	// 01: General purpose output mode
+	// 10: Alternate function mode
+	// 11: Analog mode
+	uint32_t MODER0		:2;
+	uint32_t MODER1		:2;
+	uint32_t MODER2		:2;
+	uint32_t MODER3		:2;
+	uint32_t MODER4		:2;
+	uint32_t MODER5		:2;
+	uint32_t MODER6		:2;
+	uint32_t MODER7		:2;
+	uint32_t MODER8		:2;
+	uint32_t MODER9		:2;
+	uint32_t MODER10	:2;
+	uint32_t MODER11	:2;
+	uint32_t MODER12	:2;
+	uint32_t MODER13	:2;
+	uint32_t MODER14	:2;
+	uint32_t MODER15	:2;
+ } GPIO_MODER_t;
+
+ typedef struct {
+	// Bits 15:0 OTy: Port x configuration bits (y = 0..15)
+	// 0: Output push-pull (reset state)
+	// 1: Output open-drain
+	uint32_t OT0	:1;
+	uint32_t OT1	:1;
+	uint32_t OT2	:1;
+	uint32_t OT4	:1;
+	uint32_t OT5	:1;
+	uint32_t OT6	:1;
+	uint32_t OT7	:1;
+	uint32_t OT8	:1;
+	uint32_t OT9	:1;
+	uint32_t OT10	:1;
+	uint32_t OT11	:1;
+	uint32_t OT12	:1;
+	uint32_t OT13	:1;
+	uint32_t OT14	:1;
+	uint32_t OT15	:1;
+	// Bits 31:16 Reserved, must be kept at reset value.
+	uint32_t dcb1	:16;
+ } GPIO_OTYPER_t;
+
+ typedef struct {
+	// Bits 2y:2y+1 OSPEEDRy[1:0]: Port x configuration bits (y = 0..15)
+	// 00: Low speed
+	// 01: Medium speed
+	// 10: High speed
+	// 11: Very high speed
+	uint32_t OSPEEDR0		:2;
+	uint32_t OSPEEDR1		:2;
+	uint32_t OSPEEDR2		:2;
+	uint32_t OSPEEDR3		:2;
+	uint32_t OSPEEDR4		:2;
+	uint32_t OSPEEDR5		:2;
+	uint32_t OSPEEDR6		:2;
+	uint32_t OSPEEDR7		:2;
+	uint32_t OSPEEDR8		:2;
+	uint32_t OSPEEDR9		:2;
+	uint32_t OSPEEDR10		:2;
+	uint32_t OSPEEDR11		:2;
+	uint32_t OSPEEDR12		:2;
+	uint32_t OSPEEDR13		:2;
+	uint32_t OSPEEDR14		:2;
+	uint32_t OSPEEDR15		:2;
+ } GPIO_OSPEEDR_t;
+
+ typedef struct {
+	// Bits 2y:2y+1 PUPDRy[1:0]: Port x configuration bits (y = 0..15)
+	// 00: No pull-up, pull-down
+	// 01: Pull-up
+	// 10: Pull-down
+	uint32_t PUPDR0		:2;
+	uint32_t PUPDR1		:2;
+	uint32_t PUPDR2		:2;
+	uint32_t PUPDR3		:2;
+	uint32_t PUPDR4		:2;
+	uint32_t PUPDR5		:2;
+	uint32_t PUPDR6		:2;
+	uint32_t PUPDR7		:2;
+	uint32_t PUPDR8		:2;
+	uint32_t PUPDR9		:2;
+	uint32_t PUPDR10	:2;
+	uint32_t PUPDR11	:2;
+	uint32_t PUPDR12	:2;
+	uint32_t PUPDR13	:2;
+	uint32_t PUPDR14	:2;
+	uint32_t PUPDR15	:2;
+ } GPIO_PUPDR_t;
+
 
 
 /*****************************************************************************

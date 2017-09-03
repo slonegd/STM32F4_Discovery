@@ -7,9 +7,9 @@
 			"type": "cppdbg",
 			"request": "launch",
 		 // slonegd note
-		 // "miDebuggerPath": "/home/slonegd/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/arm-none-eabi-gdb",
+		  "miDebuggerPath": "/home/slonegd/opt/gcc-arm-none-eabi-6-2017-q1-update/bin/arm-none-eabi-gdb",
 		 // work note
-		 	"miDebuggerPath": "/home/ap/Code/gcc-arm-none-eabi-6-2017-q1-update/bin/arm-none-eabi-gdb",
+		 //	"miDebuggerPath": "/home/ap/Code/gcc-arm-none-eabi-6-2017-q1-update/bin/arm-none-eabi-gdb",
 			"args": [
 				"-tui"
 			],

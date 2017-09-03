@@ -142,12 +142,14 @@ inline bool TimerEvent (eTimer_t N)
 	}
 }
 
+
 /****************************************************************************
  * прерываниe
  ***************************************************************************/
-void SysTick_Handler (void)
-{
-    TickCount++;
-}	
+ void SysTick_Handler (void)
+ {
+     extern volatile uint32_t TickCount;
+     TickCount++;
+ }	
 
 #endif // TIMER_H_
