@@ -1,13 +1,11 @@
 #include <stdint.h>
+#include "defines.h"
 #include "usrlib/stm32f4_bf.h"
 #include "usrlib/stm32f4_llul.h"
 #include "usrlib/timer.h"
-//#include "usrlib/ports.hpp"
 
 #ifndef INIT_H
 #define INIT_H
-
-
 
 inline void CLKinit (void)
 {
@@ -29,43 +27,36 @@ inline void CLKinit (void)
 
 inline void PortsInit (void)
 {
-//	extern volatile GPIO_MODER_t*	GPIOA_MODER;
-	RCC_PortClockEnable (LED_PORT);
+	LedPort::ClockEnable();
 
-	GPIO_SetModer		(LED_PORT, BLED_PIN, OutputMode);
-	GPIO_SetOutputType	(LED_PORT, BLED_PIN, PushPull);
-	GPIO_SetOutputSpeed (LED_PORT, BLED_PIN, HighSpeed);
-	GPIO_SetPullResistor (LED_PORT, BLED_PIN, NoResistor);
+	Bled::SetModer (OutputMode);
+	Bled::SetOutputType (PushPull);
+	Bled::SetOutputSpeed (HighSpeed);
+	Bled::SetPullResistor (NoResistor);
 
-	GPIO_SetModer		(LED_PORT, RLED_PIN, OutputMode);
-	GPIO_SetOutputType	(LED_PORT, RLED_PIN, PushPull);
-	GPIO_SetOutputSpeed (LED_PORT, RLED_PIN, HighSpeed);
-	GPIO_SetPullResistor (LED_PORT, RLED_PIN, NoResistor);	
+	Rled::SetModer (OutputMode);
+	Rled::SetOutputType (PushPull);
+	Rled::SetOutputSpeed (HighSpeed);
+	Rled::SetPullResistor (NoResistor);
 
-	GPIO_SetModer		(LED_PORT, OLED_PIN, OutputMode);
-	GPIO_SetOutputType	(LED_PORT, OLED_PIN, PushPull);
-	GPIO_SetOutputSpeed (LED_PORT, OLED_PIN, HighSpeed);
-	GPIO_SetPullResistor (LED_PORT, OLED_PIN, NoResistor);
+	Oled::SetModer (OutputMode);
+	Oled::SetOutputType (PushPull);
+	Oled::SetOutputSpeed (HighSpeed);
+	Oled::SetPullResistor (NoResistor);
 
-	GPIO_SetModer		(LED_PORT, GLED_PIN, OutputMode);
-	GPIO_SetOutputType	(LED_PORT, GLED_PIN, PushPull);
-	GPIO_SetOutputSpeed (LED_PORT, GLED_PIN, HighSpeed);
-	GPIO_SetPullResistor (LED_PORT, GLED_PIN, NoResistor);
-//	GPIOA_MODER->MODER1 = 0b01;
-//	PA::SetModer (OutputMode);
+	Gled::SetModer (OutputMode);
+	Gled::SetOutputType (PushPull);
+	Gled::SetOutputSpeed (HighSpeed);
+	Gled::SetPullResistor (NoResistor);
 }
 
 
 inline void TimeEventInit (void)
 {
-	TimerSetTime (BledTimer, 100);
-	TimerSetTime (GledTimer, 150);
-	TimerSetTime (OledTimer, 200);
-	TimerSetTime (RledTimer, 250);
-	TimerStart (BledTimer);
-	TimerStart (GledTimer);
-	TimerStart (OledTimer);
-	TimerStart (RledTimer);
+	TimerSetTimeAndStart (BledTimer, 110);
+	TimerSetTimeAndStart (GledTimer, 120);
+	TimerSetTimeAndStart (OledTimer, 130);
+	TimerSetTimeAndStart (RledTimer, 140);
 }
 
 #endif // INIT_H

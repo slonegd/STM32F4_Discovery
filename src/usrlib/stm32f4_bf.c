@@ -19,10 +19,9 @@ volatile FLASH_ACR_t*	FLASH_ACR 	= (FLASH_ACR_t*)   	(&(FLASH->ACR));
 /*****************************************************************************
  *		GPIO
  ****************************************************************************/
-#define MakeModer(c) volatile GPIO_MODER_t* GPIO##c##_MODER =\
+#define MakeModer(c) volatile const GPIO_MODER_t* GPIO##c##_MODER =\
 						 (GPIO_MODER_t*) (&(GPIO##c->MODER))
-volatile GPIO_MODER_t*	GPIOA_MODER = (GPIO_MODER_t*)  	(&(GPIOA->MODER));
-//MakeModer (A);
+MakeModer (A);
 MakeModer (B);
 MakeModer (C);
 MakeModer (D);

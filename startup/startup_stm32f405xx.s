@@ -108,7 +108,7 @@ LoopFillZerobss:
   bcc  FillZerobss
 
 /* Call the clock system intitialization function.*/
-  bl  SystemInit   
+/*  bl  SystemInit   */
 /* Call static constructors */
     bl __libc_init_array
 /* Call the application's entry point.*/
@@ -277,8 +277,8 @@ g_pfnVectors:
    .thumb_set PendSV_Handler,Default_Handler
 
    .weak      SysTick_Handler
-   .thumb_set SysTick_Handler,Default_Handler              
-  
+   .thumb_set SysTick_Handler,Default_Handler     
+ 
    .weak      WWDG_IRQHandler                   
    .thumb_set WWDG_IRQHandler,Default_Handler      
                   

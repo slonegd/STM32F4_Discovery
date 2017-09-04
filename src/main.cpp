@@ -20,19 +20,18 @@ int main(void)
 
         if ( TimerEvent (BledTimer) ) {
             ii++;
-            GPIO_InvPin (LED_PORT, BLED_PIN);
+            Bled::Invert();
         }
         if ( TimerEvent (GledTimer) ) {
             jj++;
-            GPIO_InvPin (LED_PORT, GLED_PIN);
+            Gled::Invert();
         }
         if ( TimerEvent (OledTimer) ) {
-            GPIO_InvPin (LED_PORT, OLED_PIN);
+            Oled::Invert();
         }
         if ( TimerEvent (RledTimer) ) {
-             GPIO_InvPin (LED_PORT, RLED_PIN);
+            Rled::Invert();
         }
-		
 	}
 }
 
@@ -42,4 +41,5 @@ int main(void)
  * прерывания
  * 
  ***************************************************************************/
+
 

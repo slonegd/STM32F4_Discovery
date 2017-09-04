@@ -49,8 +49,12 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 inc/system_stm32f4xx.c \
-src/main.c \
-src/usrlib/stm32f4_bf.c 
+src/usrlib/stm32f4_bf.c \
+src/interrupts.c
+
+# C++ sourses
+CPP_SOURCES = \
+src/main.cpp
  
 
 # ASM sources
@@ -70,6 +74,7 @@ PERIFLIB_SOURCES =
 #PREFIX = arm-none-eabi-
 PREFIX = /home/slonegd/Code/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-
 #CC = $(BINPATH)/$(PREFIX)gcc
+CPP = $(PREFIX)g++
 CC = $(PREFIX)gcc
 AS = $(PREFIX)gcc -x assembler-with-cpp
 CP = $(PREFIX)objcopy
@@ -147,12 +152,17 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 # list of objects
 OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
 vpath %.c $(sort $(dir $(C_SOURCES)))
+OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(CPP_SOURCES:.cpp=.o)))
+vpath %.cpp $(sort $(dir $(CPP_SOURCES)))
 # list of ASM program objects
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
 $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR) 
 	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
+
+$(BUILD_DIR)/%.o: %.cpp Makefile | $(BUILD_DIR) 
+	$(CPP) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.cpp=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@

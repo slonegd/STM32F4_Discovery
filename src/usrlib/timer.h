@@ -49,36 +49,21 @@
  * без volatile не работает
  */
 typedef struct {
-	/**
-	 * разрешение работы, таймер считыет и устанавливает Q
-	 * если IN == true
-	 */	
+	// разрешение работы, таймер считыет и устанавливает Q
+	// если IN == true	
 	volatile bool IN;
-	/**
-	 * время работы в мс до установки Q, если IN == true
-	 */
+	// время работы в мс до установки Q, если IN == true
 	volatile uint32_t PT;
-	/**
-	 * прошедшее время в мс, если IN == true,
-	 * инкрементируется аппаратным таймером 
-	 * (функция TimerTick)
-	 */
+	// прошедшее время в мс, если IN == true
 	volatile uint32_t ET;	
-	/**
-	 * флаг, что установленное время прошло,
-	 * устанавливается только при вызове макроса TIMER_UPDATE()
-	 * если IN == true;
-	 * сбрасывается макросом TIMER_STOP() или TIMER_RESET()
-	 */
+	// флаг, что установленное время прошло
 	volatile bool Q;			
 } stTimer_t;
 
 stTimer_t Timers[QtyTimers];
 volatile uint32_t TickCount = 0;
 
-/**
- * инициализация аппаратного таймера на 1 мс
- */
+// инициализация аппаратного таймера на 1 мс
 inline void TimerInit (void)
 {
 	SysTick->LOAD = TIMER_1MS;						//Загрузка значения
@@ -97,6 +82,11 @@ inline void TimerSetTime (eTimer_t N, uint32_t ms)
 }
 inline void TimerStart (eTimer_t N)
 {
+	Timers[N].IN = true;
+}
+inline void TimerSetTimeAndStart (eTimer_t N, uint32_t ms)
+{
+	Timers[N].PT = ms;
 	Timers[N].IN = true;
 }
 inline void TimerStop (eTimer_t N)
@@ -143,13 +133,5 @@ inline bool TimerEvent (eTimer_t N)
 }
 
 
-/****************************************************************************
- * прерываниe
- ***************************************************************************/
- void SysTick_Handler (void)
- {
-     extern volatile uint32_t TickCount;
-     TickCount++;
- }	
 
 #endif // TIMER_H_

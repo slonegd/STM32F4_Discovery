@@ -1,3 +1,6 @@
+#include "usrlib/ports.hpp"
+#include "usrlib/pins.hpp"
+
 #ifndef DEFINES_H
 #define DEFINES_H
 
@@ -12,10 +15,10 @@ typedef enum {
 } eTimer_t;
 
 // discoveri leds
-#define LED_PORT GPIOD
-#define BLED_PIN 15
-#define RLED_PIN 14
-#define OLED_PIN 13
-#define GLED_PIN 12
+typedef PD LedPort;
+typedef PD15 Bled;
+typedef PD14 Rled;
+typedef PD13 Oled;
+typedef PD12 Gled;
 
 #endif // DEFINES_H

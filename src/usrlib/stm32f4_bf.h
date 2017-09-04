@@ -226,6 +226,7 @@ typedef struct {
 	uint32_t OT0	:1;
 	uint32_t OT1	:1;
 	uint32_t OT2	:1;
+	uint32_t OT3	:1;
 	uint32_t OT4	:1;
 	uint32_t OT5	:1;
 	uint32_t OT6	:1;
