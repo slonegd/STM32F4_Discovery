@@ -13,7 +13,7 @@
 			"args": [
 				"-tui"
 			],
-			"program": "${workspaceRoot}/build/STM32F4_CUBE_DEL_HAL.elf",
+			"program": "${workspaceRoot}/build/STM32F4_DISCOVERY.elf",
 			"miDebuggerServerAddress": "localhost:4242",
 		   
 			"MIMode": "gdb",

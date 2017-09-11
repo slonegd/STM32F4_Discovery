@@ -13,7 +13,7 @@
 ######################################
 # target
 ######################################
-TARGET = STM32F4_CUBE_DEL_HAL
+TARGET = STM32F4_DISCOVERY
 
 
 ######################################
@@ -49,12 +49,12 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 inc/system_stm32f4xx.c \
-src/usrlib/stm32f4_bf.c \
-src/interrupts.c
+src/usrlib/stm32f4_bf.c 
+
 
 # C++ sourses
 CPP_SOURCES = \
-src/main.cpp
+src/main.cpp 
  
 
 # ASM sources

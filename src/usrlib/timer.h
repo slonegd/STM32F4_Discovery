@@ -3,7 +3,7 @@
  * 
  * Количество таймеров долно быть определено константой QtyTimers,
  * которая является частью перечисления eTimer_t, которое должно быть
- * определено, например в init.h. Пример:
+ * определено, например в defines.h. Пример:
  * 		typedef enum {
  *  		timer1 = 0,
  * 			timer2,
@@ -12,34 +12,24 @@
  * 
  * Один таймер хранится в памяти в виде stTimer_t
  * объявление таймеров в этом файле
- * для обращения к членам таймера в других файлах, использовать
- * extern stTimer_t Timers[QtyTimers];
- * !!! НО это не рекомендуеться, есть функции
  * 
- * В прерывании инкрементировать буферную переменну,
- * по велечине которой функция TimersUpdate оьновляет все таймеры
+ * В прерывании инкрементировать буферную переменну функцией TimerInc
+ * по велечине которой функция TimersUpdate обновляет все таймеры
  * функцию TimersUpdate необходимо вызывать
  * 
  * должен быть определен макрос F_CPU (например в defines.h)
  * 
- * обработчик прерывания тут SysTick_Handler,
- * если необходимо перенести в другой файл,
- * то обязательно следующее
- * 		void SysTick_Handler (void)
- * 		{
- * 			extern volatile uint32_t TickCount;
- *   		TickCount++;
- *			//далее добавить, что нужно
- *		}
  */
+ #pragma once
+ #ifndef TIMER_H_
+ #define TIMER_H_
 
 #include <stdint.h>
 #include <stdbool.h>
 #include "../defines.h"
 #include "../inc/stm32f4xx.h"
 
-#ifndef TIMER_H_
-#define TIMER_H_
+
 
 #define TIMER_1MS	F_CPU/1000-1
 
@@ -60,8 +50,8 @@ typedef struct {
 	volatile bool Q;			
 } stTimer_t;
 
-stTimer_t Timers[QtyTimers];
-volatile uint32_t TickCount = 0;
+static stTimer_t Timers[QtyTimers];
+static volatile uint32_t TickCount;
 
 // инициализация аппаратного таймера на 1 мс
 inline void TimerInit (void)
@@ -132,6 +122,12 @@ inline bool TimerEvent (eTimer_t N)
 	}
 }
 
+// инкрементирует буферный счетчик
+// функция должна вызываться в прерывнии SysTick_Handler
+inline void TimerInc (void)
+{
+	TickCount++;
+}
 
 
 #endif // TIMER_H_

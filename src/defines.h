@@ -1,8 +1,9 @@
-#include "usrlib/ports.hpp"
-#include "usrlib/pins.hpp"
-
+#pragma once
 #ifndef DEFINES_H
 #define DEFINES_H
+
+#include "usrlib/ports.hpp"
+#include "usrlib/pins.hpp"
 
 #define F_CPU   168000000UL
 

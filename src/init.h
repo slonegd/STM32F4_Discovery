@@ -1,11 +1,13 @@
+#pragma once
+#ifndef INIT_H
+#define INIT_H
+
 #include <stdint.h>
 #include "defines.h"
 #include "usrlib/stm32f4_bf.h"
 #include "usrlib/stm32f4_llul.h"
 #include "usrlib/timer.h"
-
-#ifndef INIT_H
-#define INIT_H
+#include "usrlib/tim2-5.hpp"
 
 inline void CLKinit (void)
 {
@@ -50,13 +52,17 @@ inline void PortsInit (void)
 	Gled::SetPullResistor (NoResistor);
 }
 
-
 inline void TimeEventInit (void)
 {
-	TimerSetTimeAndStart (BledTimer, 110);
-	TimerSetTimeAndStart (GledTimer, 120);
-	TimerSetTimeAndStart (OledTimer, 130);
-	TimerSetTimeAndStart (RledTimer, 140);
+	TimerSetTimeAndStart (BledTimer, 60);
+	TimerSetTimeAndStart (GledTimer, 61);
+	TimerSetTimeAndStart (OledTimer, 62);
+	TimerSetTimeAndStart (RledTimer, 63);
+}
+
+inline void PWMinit (void)
+{
+	T2::CountEnable ();
 }
 
 #endif // INIT_H
