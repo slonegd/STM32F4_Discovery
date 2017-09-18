@@ -2,7 +2,7 @@
  * Библиотека инлайн функций для работы с регистрами
  * llul - low layer user lib
  */
-#include "stm32f4_bf.h"
+#include "stm32f4_bf.hpp"
 
 #ifndef STM32F4_LLUL_H
 #define STM32F4_LLUL_H
@@ -38,25 +38,25 @@ inline void RCC_WaitPLLready (void)
 	while (RCC_CR->PLLRDY != 1) { }
 }
 
-inline void RCC_SetAHBprescaler (eAHBprescaler_t prescaler)
+inline void RCC_SetAHBprescaler (AHBprescaler_t prescaler)
 {
 	extern volatile RCC_CFGR_t* RCC_CFGR;
 	RCC_CFGR->HPRE = prescaler;
 }
 
-inline void RCC_SetAPB1prescaler (volatile eAPBprescaler_t APB1prescaler)
+inline void RCC_SetAPB1prescaler (volatile APBprescaler_t APB1prescaler)
 {
 	extern volatile RCC_CFGR_t* RCC_CFGR;
 	RCC_CFGR->PPRE1 = APB1prescaler;
 }
 
-inline void RCC_SetAPB2prescaler (volatile eAPBprescaler_t APB2prescaler)
+inline void RCC_SetAPB2prescaler (volatile APBprescaler_t APB2prescaler)
 {
 	extern volatile RCC_CFGR_t* RCC_CFGR;
 	RCC_CFGR->PPRE2 = APB2prescaler;
 }
 
-inline void RCC_SystemClockSwitch (eSystemClockSwitch_t var)
+inline void RCC_SystemClockSwitch (SystemClockSwitch_t var)
 {
 	extern volatile RCC_CFGR_t* RCC_CFGR;
 	RCC_CFGR->SW = var;
@@ -76,7 +76,7 @@ inline void RCC_SetPLLN (uint16_t var)
 	RCC_PLLCFGR->PLLN = var;
 }
 
-inline void RCC_SetPLLP (ePLLPdiv_t div)
+inline void RCC_SetPLLP (PLLPdiv_t div)
 {
 	extern volatile RCC_PLLCFGR_t* RCC_PLLCFGR;
 	RCC_PLLCFGR->PLLP = div;
@@ -89,7 +89,7 @@ inline void RCC_SetPLLQ (uint16_t var)
 	RCC_PLLCFGR->PLLQ = var;
 }
 
-inline void RCC_SetPLLsource (ePLLsource_t source)
+inline void RCC_SetPLLsource (PLLsource_t source)
 {
 	extern volatile RCC_PLLCFGR_t* RCC_PLLCFGR;
 	RCC_PLLCFGR->PLLSRC = source;
@@ -122,7 +122,7 @@ inline void RCC_PortClockEnable (GPIO_TypeDef* Port)
 /*****************************************************************************
  *		FLASH
  ****************************************************************************/
-inline void FLASH_SetLatency (eLatency_t Latency)
+inline void FLASH_SetLatency (Latency_t Latency)
 {
 	extern volatile FLASH_ACR_t* FLASH_ACR;
 	FLASH_ACR->LATENCY = Latency;
@@ -132,25 +132,25 @@ inline void FLASH_SetLatency (eLatency_t Latency)
  *		GPIO
  ****************************************************************************/
 
-inline void GPIO_SetModer (GPIO_TypeDef* Port, uint8_t Pin, eMode_t Mode)
+inline void GPIO_SetModer (GPIO_TypeDef* Port, uint8_t Pin, Mode_t Mode)
 {
 	CLEAR_MASK	(Port->MODER, (uint32_t)0b11 << (Pin*2));
 	SET_MASK	(Port->MODER, (uint32_t)Mode << (Pin*2));
 }
 
-inline void GPIO_SetOutputType (GPIO_TypeDef* Port, uint8_t Pin, eOutputType_t OutputType)
+inline void GPIO_SetOutputType (GPIO_TypeDef* Port, uint8_t Pin, OutputType_t OutputType)
 {
 	CLEAR_MASK	(Port->OTYPER, (uint32_t)0b1 << Pin);
 	SET_MASK	(Port->OTYPER, (uint32_t)OutputType << Pin);
 }
 
-inline void GPIO_SetOutputSpeed (GPIO_TypeDef* Port, uint8_t Pin, eOutputSpeed_t OutputSpeed)
+inline void GPIO_SetOutputSpeed (GPIO_TypeDef* Port, uint8_t Pin, OutputSpeed_t OutputSpeed)
 {
 	CLEAR_MASK	(Port->OSPEEDR, (uint32_t)0b11 << (Pin*2));
 	SET_MASK	(Port->OSPEEDR, (uint32_t)OutputSpeed << (Pin*2));
 }
 
-inline void GPIO_SetPullResistor (GPIO_TypeDef* Port, uint8_t Pin, ePullResistor_t PullResistor)
+inline void GPIO_SetPullResistor (GPIO_TypeDef* Port, uint8_t Pin, PullResistor_t PullResistor)
 {
 	CLEAR_MASK	(Port->PUPDR, (uint32_t)0b11 << (Pin*2));
 	SET_MASK	(Port->PUPDR, (uint32_t)PullResistor << (Pin*2));

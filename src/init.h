@@ -4,52 +4,46 @@
 
 #include <stdint.h>
 #include "defines.h"
-#include "usrlib/stm32f4_bf.h"
+#include "usrlib/stm32f4_bf.hpp"
 #include "usrlib/stm32f4_llul.h"
 #include "usrlib/timer.h"
 #include "usrlib/tim2-5.hpp"
 
 inline void CLKinit (void)
 {
-	FLASH_SetLatency (latency_5);
+	FLASH_SetLatency (Latency_t::latency_5);
 	RCC_HSEon ();
 	RCC_WaitHSEready ();
-	RCC_SetAHBprescaler (AHBnotdiv);
-	RCC_SetAPB1prescaler(APBdiv4);
-	RCC_SetAPB2prescaler(APBdiv2);
-	RCC_SystemClockSwitch (PLL);
+	RCC_SetAHBprescaler (AHBprescaler_t::notdiv);
+	RCC_SetAPB1prescaler(APBprescaler_t::div4);
+	RCC_SetAPB2prescaler(APBprescaler_t::div2);
+	RCC_SystemClockSwitch (SystemClockSwitch_t::PLL);
 	RCC_SetPLLM (8);
 	RCC_SetPLLN (168);
-	RCC_SetPLLP (PLLP_div2);
+	RCC_SetPLLP (PLLPdiv_t::div2);
 	RCC_SetPLLQ (4);
-	RCC_SetPLLsource (HSEsource);
+	RCC_SetPLLsource (PLLsource_t::HSE);
 	RCC_PLLon ();
 	RCC_WaitPLLready ();
 }
+
+template <class T>
+static inline void SetLed (void)
+{
+    T::SetModer (Mode_t::OutputMode);
+    T::SetOutputType (OutputType_t::PushPull);
+	T::SetOutputSpeed (OutputSpeed_t::HighSpeed);
+	T::SetPullResistor (PullResistor_t::No);
+};
 
 inline void PortsInit (void)
 {
 	LedPort::ClockEnable();
 
-	Bled::SetModer (OutputMode);
-	Bled::SetOutputType (PushPull);
-	Bled::SetOutputSpeed (HighSpeed);
-	Bled::SetPullResistor (NoResistor);
-
-	Rled::SetModer (OutputMode);
-	Rled::SetOutputType (PushPull);
-	Rled::SetOutputSpeed (HighSpeed);
-	Rled::SetPullResistor (NoResistor);
-
-	Oled::SetModer (OutputMode);
-	Oled::SetOutputType (PushPull);
-	Oled::SetOutputSpeed (HighSpeed);
-	Oled::SetPullResistor (NoResistor);
-
-	Gled::SetModer (OutputMode);
-	Gled::SetOutputType (PushPull);
-	Gled::SetOutputSpeed (HighSpeed);
-	Gled::SetPullResistor (NoResistor);
+    SetLed <Bled> ();
+    SetLed <Rled> ();
+    SetLed <Oled> ();
+    SetLed <Gled> ();
 }
 
 inline void TimeEventInit (void)

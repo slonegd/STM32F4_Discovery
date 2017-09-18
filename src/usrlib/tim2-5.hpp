@@ -4,7 +4,7 @@
  * и может быть передан в качестве параметра шаблона
  */
 
-#include "stm32f4_bf.h"
+#include "stm32f4_bf.hpp"
 #include "stm32f4_llul.h"
 
 #ifndef TIM2_5_HPP

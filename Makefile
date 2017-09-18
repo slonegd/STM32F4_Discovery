@@ -49,12 +49,13 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 inc/system_stm32f4xx.c \
-src/usrlib/stm32f4_bf.c 
+ 
 
 
 # C++ sourses
 CPP_SOURCES = \
-src/main.cpp 
+src/main.cpp \
+src/usrlib/stm32f4_bf.cpp
  
 
 # ASM sources
@@ -71,8 +72,8 @@ PERIFLIB_SOURCES =
 #######################################
 # binaries
 #######################################
-#PREFIX = arm-none-eabi-
-PREFIX = /home/slonegd/Code/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-
+PREFIX = arm-none-eabi-
+#PREFIX = /home/slonegd/Code/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-
 #CC = $(BINPATH)/$(PREFIX)gcc
 CPP = $(PREFIX)g++
 CC = $(PREFIX)gcc
@@ -120,7 +121,7 @@ C_INCLUDES =  \
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections #-std=c99
+CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections -std=c++11
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
@@ -186,8 +187,9 @@ $(BUILD_DIR):
 clean:
 	-rm -fR .dep $(BUILD_DIR)
 
-flash_stlink: 
-	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
+flash_stlink:
+	/home/dvk/code/stlink/build/Release/st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
+#	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
   
 #######################################
 # dependencies

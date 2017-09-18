@@ -17,9 +17,10 @@ typedef enum {
 
 // discoveri leds
 typedef PD LedPort;
-typedef PD15 Bled;
-typedef PD14 Rled;
-typedef PD13 Oled;
-typedef PD12 Gled;
+typedef Tpin<PD,15> Bled;
+typedef Tpin<PD,14> Rled;
+typedef Tpin<PD,13> Oled;
+typedef Tpin<PD,12> Gled;
+
 
 #endif // DEFINES_H
