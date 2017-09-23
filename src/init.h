@@ -6,6 +6,7 @@
 #include "defines.h"
 #include "usrlib/stm32f4_bf.hpp"
 #include "usrlib/stm32f4_llul.h"
+#include "usrlib/stm32f4_RegClasses.hpp"
 #include "usrlib/timer.h"
 #include "usrlib/tim2-5.hpp"
 
@@ -20,11 +21,24 @@ inline void CLKinit (void)
 	RCC_SystemClockSwitch (SystemClockSwitch_t::PLL);
 	RCC_SetPLLM (8);
 	RCC_SetPLLN (168);
-	RCC_SetPLLP (PLLPdiv_t::div2);
+// 1 : через статический класс						1596
+//	RCC_::SetPLLP (RCC_::PLLPdiv::div2);
+// 2 : через объект (еще необходимо проверить)		1596
+	RCC_PLLCFGR r;
+//	r.bits.PLLP = RCC_PLLCFGR::PLLPdiv::div2;
+	r.rSetPLLP (RCC_PLLCFGR::PLLPdiv::div2);
+// 3 : функция с внешней глобальной переменной 		1592
+//	RCC_SetPLLP (PLLPdiv_t::div2);
+// 4 : CMSIS										1596
+//	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLP_Msk);
+//	RCC->PLLCFGR |= RCC_PLLCFGR_PLLP_0;
+
 	RCC_SetPLLQ (4);
 	RCC_SetPLLsource (PLLsource_t::HSE);
 	RCC_PLLon ();
 	RCC_WaitPLLready ();
+
+
 }
 
 template <class T>

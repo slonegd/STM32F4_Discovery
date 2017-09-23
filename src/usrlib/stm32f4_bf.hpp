@@ -424,7 +424,59 @@ typedef struct {
 	latency_5,
 	latency_6,
 	latency_7
+};/*
+struct Latency_t {
+	enum  {
+		latency_0 = 0,
+		latency_1,
+		latency_2,
+		latency_3,
+		latency_4,
+		latency_5,
+		latency_6,
+		latency_7		
+	};
 };
+*/
+/*
+struct FLASH_ACR2 {
+	union Control {
+		enum {
+			adr = &(Flash->ACR)
+		}
+		enum LATENCY {
+			latency_0 = 0,
+			latency_1,
+			latency_2,
+			latency_3,
+			latency_4,
+			latency_5,
+			latency_6,
+			latency_7				
+		}
+	}
+	struct Bits {
+		// Bits 2:0 LATENCY[2:0]: Latency
+		uint32_t LATENCY	:3;
+		// Bits 7:3 Reserved, must be kept cleared.
+		uint32_t dcb1		:5;
+		// Bit 8 PRFTEN: Prefetch enable
+		uint32_t PRFTEN		:1;
+		// Bit 9 ICEN: Instruction cache enable
+		uint32_t ICEN		:1;
+		// Bit 10 DCEN: Data cache enable
+		uint32_t DCEN		:1;
+		// Bit 11 ICRST: Instruction cache reset
+		uint32_t ICRST		:1;
+		// Bit 12 DCRST: Data cache reset
+		uint32_t DCRST		:1;
+		// Bits 31:13 Reserved, must be kept cleared.
+		uint32_t dcb2		:19;
+	} bits;
+	uint32_t raw;
+	Control (uint32_t v = 0) : raw(v) {}
+};
+*/
 
 typedef struct {
 	// Bits 2:0 LATENCY[2:0]: Latency
