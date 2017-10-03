@@ -1,0 +1,330 @@
+/**
+ * RAL над портами ввода вывода
+ * в конце файла определяються статические классы,
+ * которые необходимы для конкретизации шаблонных классов
+ * в pin_hal
+ */
+
+#pragma once
+
+#include <stdint.h>
+#include "stm32f4xx.h"
+
+struct MODER_t
+{
+    enum Mode_t {
+        InputMode		= 0b00,
+        OutputMode		= 0b01,
+        AlternateMode	= 0b10,
+        AnalogMode		= 0b11
+    };
+    struct ModerBits_t {
+        volatile Mode_t MODER0	:2;
+        volatile Mode_t MODER1	:2;
+        volatile Mode_t MODER2	:2;
+        volatile Mode_t MODER3	:2;
+        volatile Mode_t MODER4	:2;
+        volatile Mode_t MODER5	:2;
+        volatile Mode_t MODER6	:2;
+        volatile Mode_t MODER7	:2;
+        volatile Mode_t MODER8	:2;
+        volatile Mode_t MODER9	:2;
+        volatile Mode_t MODER10	:2;
+        volatile Mode_t MODER11	:2;
+        volatile Mode_t MODER12	:2;
+        volatile Mode_t MODER13	:2;
+        volatile Mode_t MODER14	:2;
+        volatile Mode_t MODER15	:2;        
+    };
+    union {
+        volatile ModerBits_t bits;
+        volatile uint32_t reg;
+    };
+};
+
+struct OTYPER_t
+{
+    enum  OutType_t {
+        PushPull	= 0b0,
+        OpenDrain	= 0b1
+    };
+    struct OtyperBits_t {
+        volatile OutType_t OT0	:1;
+        volatile OutType_t OT1	:1;
+        volatile OutType_t OT2	:1;
+        volatile OutType_t OT3	:1;
+        volatile OutType_t OT4	:1;
+        volatile OutType_t OT5	:1;
+        volatile OutType_t OT6	:1;
+        volatile OutType_t OT7	:1;
+        volatile OutType_t OT8	:1;
+        volatile OutType_t OT9	:1;
+        volatile OutType_t OT10	:1;
+        volatile OutType_t OT11	:1;
+        volatile OutType_t OT12	:1;
+        volatile OutType_t OT13	:1;
+        volatile OutType_t OT14	:1;
+        volatile OutType_t OT15	:1;
+        // Bits 31:16 Reserved, must be kept at reset value.
+        uint32_t dcb1	:16;
+    };
+    union {
+        volatile OtyperBits_t bits;
+        volatile uint32_t reg;
+    };
+};
+
+struct OSPEEDR_t
+{
+    enum OutSpeed_t {
+        Low	        = 0b00,
+        Medium	    = 0b01,
+        High	    = 0b10,
+        VeryHigh	= 0b11
+    };
+    struct OspeedrBits_t {
+        volatile OutSpeed_t OSPEEDR0	:2;
+        volatile OutSpeed_t OSPEEDR1	:2;
+        volatile OutSpeed_t OSPEEDR2	:2;
+        volatile OutSpeed_t OSPEEDR3	:2;
+        volatile OutSpeed_t OSPEEDR4	:2;
+        volatile OutSpeed_t OSPEEDR5	:2;
+        volatile OutSpeed_t OSPEEDR6	:2;
+        volatile OutSpeed_t OSPEEDR7	:2;
+        volatile OutSpeed_t OSPEEDR8	:2;
+        volatile OutSpeed_t OSPEEDR9	:2;
+        volatile OutSpeed_t OSPEEDR10	:2;
+        volatile OutSpeed_t OSPEEDR11	:2;
+        volatile OutSpeed_t OSPEEDR12	:2;
+        volatile OutSpeed_t OSPEEDR13	:2;
+        volatile OutSpeed_t OSPEEDR14	:2;
+        volatile OutSpeed_t OSPEEDR15	:2;
+    };
+    union {
+        volatile OspeedrBits_t bits;
+        volatile uint32_t reg;
+    };
+};
+
+struct PUPDR_t
+{
+    enum PullResistor_t {
+        No	    = 0b00,
+        Up		= 0b01,
+        Down	= 0b10
+    };
+    struct PupdrBits_t {
+        volatile PullResistor_t PUPDR0	:2;
+        volatile PullResistor_t PUPDR1	:2;
+        volatile PullResistor_t PUPDR2	:2;
+        volatile PullResistor_t PUPDR3	:2;
+        volatile PullResistor_t PUPDR4	:2;
+        volatile PullResistor_t PUPDR5	:2;
+        volatile PullResistor_t PUPDR6	:2;
+        volatile PullResistor_t PUPDR7	:2;
+        volatile PullResistor_t PUPDR8	:2;
+        volatile PullResistor_t PUPDR9	:2;
+        volatile PullResistor_t PUPDR10	:2;
+        volatile PullResistor_t PUPDR11	:2;
+        volatile PullResistor_t PUPDR12	:2;
+        volatile PullResistor_t PUPDR13	:2;
+        volatile PullResistor_t PUPDR14	:2;
+        volatile PullResistor_t PUPDR15	:2;
+    };
+    union {
+        volatile PupdrBits_t bits;
+        volatile uint32_t reg;
+    };
+};
+
+struct IDR_t
+{
+    uint32_t reg;
+};
+
+struct ODR_t
+{
+    uint32_t reg;
+};
+
+struct BSRR_t
+{
+    uint32_t reg;
+};
+
+/*
+typedef struct
+{
+__IO uint32_t MODER;    // GPIO port mode register,               Address offset: 0x00
+__IO uint32_t OTYPER;   // GPIO port output type register,        Address offset: 0x04
+__IO uint32_t OSPEEDR;  // GPIO port output speed register,       Address offset: 0x08
+__IO uint32_t PUPDR;    // GPIO port pull-up/pull-down register,  Address offset: 0x0C
+__IO uint32_t IDR;      // GPIO port input data register,         Address offset: 0x10
+__IO uint32_t ODR;      // GPIO port output data register,        Address offset: 0x14
+__IO uint32_t BSRR;     // GPIO port bit set/reset register,      Address offset: 0x18
+__IO uint32_t LCKR;     // GPIO port configuration lock register, Address offset: 0x1C
+__IO uint32_t AFR[2];   // GPIO alternate function registers,     Address offset: 0x20-0x24
+} GPIO_TypeDef;
+*/
+
+class GPIO_t : public MODER_t,
+               public OTYPER_t,
+               public OSPEEDR_t,
+               public PUPDR_t,
+               public IDR_t,
+               public ODR_t,
+               public BSRR_t
+//LCKR AFR пока не нужны
+{
+
+};
+
+class PA : protected GPIO_t
+{ 
+protected:	
+    static volatile MODER_t   &mode()   { return (MODER_t &)  GPIOA->MODER;   }
+    static volatile OTYPER_t  &otype()  { return (OTYPER_t &) GPIOA->OTYPER;  }
+    static volatile OSPEEDR_t &ospeed() { return (OSPEEDR_t &)GPIOA->OSPEEDR; }
+    static volatile PUPDR_t   &pupd()   { return (PUPDR_t &)  GPIOA->PUPDR;   }
+    static volatile ODR_t     &od()     { return (ODR_t &)    GPIOA->ODR;     }
+    static volatile IDR_t     &id()     { return (IDR_t &)    GPIOA->IDR;     }
+    static volatile BSRR_t    &bsr()    { return (BSRR_t &)   GPIOA->BSRR;    }
+public:
+    inline static void ClockEnable (void) 
+    {
+        RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN_Msk;
+    }
+    inline static void WriteSet (uint16_t val)
+    {
+        bsr().reg = val;
+    }
+    inline static void WriteReset (uint16_t val)
+    {
+        bsr().reg = val << 16;
+    }
+};
+
+class PB : protected GPIO_t
+{ 
+protected:	
+    static volatile MODER_t   &mode()   { return (MODER_t &)  GPIOB->MODER;   }
+    static volatile OTYPER_t  &otype()  { return (OTYPER_t &) GPIOB->OTYPER;  }
+    static volatile OSPEEDR_t &ospeed() { return (OSPEEDR_t &)GPIOB->OSPEEDR; }
+    static volatile PUPDR_t   &pupd()   { return (PUPDR_t &)  GPIOB->PUPDR;   }
+    static volatile ODR_t     &od()     { return (ODR_t &)    GPIOB->ODR;     }
+    static volatile IDR_t     &id()     { return (IDR_t &)    GPIOB->IDR;     }
+    static volatile BSRR_t    &bsr()    { return (BSRR_t &)   GPIOB->BSRR;    }
+public:
+    inline static void ClockEnable (void) 
+    { 
+        RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN_Msk;
+    }
+    inline static void WriteSet (uint16_t val)
+    {
+        bsr().reg = val;
+    }
+    inline static void WriteReset (uint16_t val)
+    {
+        bsr().reg = val << 16;
+    }
+};
+
+class PC : protected GPIO_t
+{ 
+protected:	
+    static volatile MODER_t   &mode()   { return (MODER_t &)  GPIOC->MODER;   }
+    static volatile OTYPER_t  &otype()  { return (OTYPER_t &) GPIOC->OTYPER;  }
+    static volatile OSPEEDR_t &ospeed() { return (OSPEEDR_t &)GPIOC->OSPEEDR; }
+    static volatile PUPDR_t   &pupd()   { return (PUPDR_t &)  GPIOC->PUPDR;   }
+    static volatile ODR_t     &od()     { return (ODR_t &)    GPIOC->ODR;     }
+    static volatile IDR_t     &id()     { return (IDR_t &)    GPIOC->IDR;     }
+    static volatile BSRR_t    &bsr()    { return (BSRR_t &)   GPIOC->BSRR;    }
+public:
+    inline static void ClockEnable (void) 
+    { 
+        RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN_Msk;
+    }
+    inline static void WriteSet (uint16_t val)
+    {
+        bsr().reg = val;
+    }
+    inline static void WriteReset (uint16_t val)
+    {
+        bsr().reg = val << 16;
+    }
+};
+
+class PD : protected GPIO_t
+{ 
+protected:	
+    static volatile MODER_t   &mode()   { return (MODER_t &)  GPIOD->MODER;   }
+    static volatile OTYPER_t  &otype()  { return (OTYPER_t &) GPIOD->OTYPER;  }
+    static volatile OSPEEDR_t &ospeed() { return (OSPEEDR_t &)GPIOD->OSPEEDR; }
+    static volatile PUPDR_t   &pupd()   { return (PUPDR_t &)  GPIOD->PUPDR;   }
+    static volatile ODR_t     &od()     { return (ODR_t &)    GPIOD->ODR;     }
+    static volatile IDR_t     &id()     { return (IDR_t &)    GPIOD->IDR;     }
+    static volatile BSRR_t    &bsr()    { return (BSRR_t &)   GPIOD->BSRR;    }
+public:
+    inline static void ClockEnable (void) 
+    { 
+        RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN_Msk;
+    }
+    inline static void WriteSet (uint16_t val)
+    {
+        bsr().reg = val;
+    }
+    inline static void WriteReset (uint16_t val)
+    {
+        bsr().reg = val << 16;
+    }
+};
+
+class PE : protected GPIO_t
+{ 
+protected:	
+    static volatile MODER_t   &mode()   { return (MODER_t &)  GPIOE->MODER;   }
+    static volatile OTYPER_t  &otype()  { return (OTYPER_t &) GPIOE->OTYPER;  }
+    static volatile OSPEEDR_t &ospeed() { return (OSPEEDR_t &)GPIOE->OSPEEDR; }
+    static volatile PUPDR_t   &pupd()   { return (PUPDR_t &)  GPIOE->PUPDR;   }
+    static volatile ODR_t     &od()     { return (ODR_t &)    GPIOE->ODR;     }
+    static volatile IDR_t     &id()     { return (IDR_t &)    GPIOE->IDR;     }
+    static volatile BSRR_t    &bsr()    { return (BSRR_t &)   GPIOE->BSRR;    }
+public:
+    inline static void ClockEnable (void) 
+    { 
+        RCC->AHB1ENR |= RCC_AHB1ENR_GPIOEEN_Msk;
+    }
+    inline static void WriteSet (uint16_t val)
+    {
+        bsr().reg = val;
+    }
+    inline static void WriteReset (uint16_t val)
+    {
+        bsr().reg = val << 16;
+    }
+};
+
+class PF : protected GPIO_t
+{ 
+protected:	
+    static volatile MODER_t   &mode()   { return (MODER_t &)  GPIOF->MODER;   }
+    static volatile OTYPER_t  &otype()  { return (OTYPER_t &) GPIOF->OTYPER;  }
+    static volatile OSPEEDR_t &ospeed() { return (OSPEEDR_t &)GPIOF->OSPEEDR; }
+    static volatile PUPDR_t   &pupd()   { return (PUPDR_t &)  GPIOF->PUPDR;   }
+    static volatile ODR_t     &od()     { return (ODR_t &)    GPIOF->ODR;     }
+    static volatile IDR_t     &id()     { return (IDR_t &)    GPIOF->IDR;     }
+    static volatile BSRR_t    &bsr()    { return (BSRR_t &)   GPIOF->BSRR;    }
+public:
+    inline static void ClockEnable (void) 
+    { 
+        RCC->AHB1ENR |= RCC_AHB1ENR_GPIOFEN_Msk;
+    }
+    inline static void WriteSet (uint16_t val)
+    {
+        bsr().reg = val;
+    }
+    inline static void WriteReset (uint16_t val)
+    {
+        bsr().reg = val << 16;
+    }
+};

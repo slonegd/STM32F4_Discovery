@@ -1,9 +1,8 @@
 #pragma once
-#ifndef DEFINES_H
-#define DEFINES_H
 
-#include "usrlib/ports.hpp"
-#include "usrlib/pins.hpp"
+#include "usrlib/uc_hal/pin_hal.h"
+#include "usrlib/uc_hal/stm32f4_ral/RCC_ral.h"
+#include "usrlib/uc_hal/stm32f4_ral/DebugVar.h"
 
 #define F_CPU   168000000UL
 
@@ -17,10 +16,7 @@ typedef enum {
 
 // discoveri leds
 typedef PD LedPort;
-typedef Tpin<PD,15> Bled;
-typedef Tpin<PD,14> Rled;
-typedef Tpin<PD,13> Oled;
-typedef Tpin<PD,12> Gled;
-
-
-#endif // DEFINES_H
+typedef Pin_t<PD,15> Bled;
+typedef Pin_t<PD,14> Rled;
+typedef Pin_t<PD,13> Oled;
+typedef Pin_t<PD,12> Gled;

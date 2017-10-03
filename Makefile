@@ -22,19 +22,21 @@ TARGET = STM32F4_DISCOVERY
 # debug build?
 DEBUG = 1
 # optimization
-OPT = -Og
+OPT = -O2
 
 
 #######################################
 # paths
 #######################################
 # source path
-SOURCES_DIR =  \
-Application \
-inc \
-inc/CMSIS \
-src \
-src/usrlib
+SOURCES_DIR =  
+SOURCES_DIR += Application 
+SOURCES_DIR += inc 
+SOURCES_DIR += inc/CMSIS 
+SOURCES_DIR += src 
+SOURCES_DIR += src/usrlib
+SOURCES_DIR += src/usrlib/uc_hal
+SOURCES_DIR += src/usrlib/uc_hal/stm32f4_ral
 
 
 # firmware library path
@@ -47,20 +49,16 @@ BUILD_DIR = build
 # source
 ######################################
 # C sources
-C_SOURCES =  \
-inc/system_stm32f4xx.c \
+C_SOURCES = inc/system_stm32f4xx.c 
  
-
-
 # C++ sourses
-CPP_SOURCES = \
-src/main.cpp \
-src/usrlib/stm32f4_bf.cpp
- 
+CPP_SOURCES = 
+CPP_SOURCES += src/main.cpp 
+CPP_SOURCES += src/usrlib/stm32f4_bf.cpp 
+#CPP_SOURCES += src/usrlib/uc_hal/stm32f4_ral/DebugVar.cpp
 
 # ASM sources
-ASM_SOURCES =  \
-startup/startup_stm32f405xx.s
+ASM_SOURCES = startup/startup_stm32f405xx.s
 
 
 ######################################
@@ -104,27 +102,26 @@ MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 AS_DEFS = 
 
 # C defines
-C_DEFS =  \
--DSTM32F405xx
+C_DEFS = -DSTM32F405xx
 
 
 # AS includes
 AS_INCLUDES = 
 
 # C includes
-C_INCLUDES =  \
--Iinc \
--Iinc/CMSIS 
+C_INCLUDES =  
+C_INCLUDES += -Iinc 
+C_INCLUDES += -Iinc/CMSIS 
 
 
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections -std=c++14
+CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections 
 
 ifeq ($(DEBUG), 1)
-CFLAGS += -g -gdwarf-2
+CFLAGS += -g -gdwarf-2 
 endif
 
 
@@ -160,10 +157,10 @@ OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
 
 $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR) 
-	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
+	$(CC) -c $(CFLAGS) -std=c99 -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.cpp Makefile | $(BUILD_DIR) 
-	$(CPP) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.cpp=.lst)) $< -o $@
+	$(CPP) -c $(CFLAGS) -std=c++11 -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.cpp=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@
@@ -188,8 +185,8 @@ clean:
 	-rm -fR .dep $(BUILD_DIR)
 
 flash_stlink:
-	/home/dvk/code/stlink/build/Release/st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
-#	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
+#	/home/dvk/code/stlink/build/Release/st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
+	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
   
 #######################################
 # dependencies

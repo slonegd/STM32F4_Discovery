@@ -6,66 +6,49 @@
 #include "defines.h"
 #include "usrlib/stm32f4_bf.hpp"
 #include "usrlib/stm32f4_llul.h"
-#include "usrlib/stm32f4_RegClasses.hpp"
 #include "usrlib/timer.h"
 #include "usrlib/tim2-5.hpp"
+
 
 inline void CLKinit (void)
 {
 	FLASH_SetLatency (Latency_t::latency_5);
-	RCC_HSEon ();
-	RCC_WaitHSEready ();
-	RCC_SetAHBprescaler (AHBprescaler_t::notdiv);
-	RCC_SetAPB1prescaler(APBprescaler_t::div4);
-	RCC_SetAPB2prescaler(APBprescaler_t::div2);
-	RCC_SystemClockSwitch (SystemClockSwitch_t::PLL);
-	RCC_SetPLLM (8);
-	RCC_SetPLLN (168);
-// 1 : через статический класс						1596
-//	RCC_::SetPLLP (RCC_::PLLPdiv::div2);
-// 2 : через объект (еще необходимо проверить)		1596
-	RCC_PLLCFGR r;
-//	r.bits.PLLP = RCC_PLLCFGR::PLLPdiv::div2;
-	r.rSetPLLP (RCC_PLLCFGR::PLLPdiv::div2);
-// 3 : функция с внешней глобальной переменной 		1592
-//	RCC_SetPLLP (PLLPdiv_t::div2);
-// 4 : CMSIS										1596
-//	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLP_Msk);
-//	RCC->PLLCFGR |= RCC_PLLCFGR_PLLP_0;
-
-	RCC_SetPLLQ (4);
-	RCC_SetPLLsource (PLLsource_t::HSE);
-	RCC_PLLon ();
-	RCC_WaitPLLready ();
-
-
+    RCC_t::HSEon ();
+    RCC_t::waitHSEready ();
+    RCC_t::setAHBprescaler (RCC_t::AHBprescaler::AHBnotdiv);
+    RCC_t::setAPB1prescaler (RCC_t::APBprescaler::APBdiv4);
+    RCC_t::setAPB2prescaler (RCC_t::APBprescaler::APBdiv2);
+    RCC_t::systemClockSwitch (RCC_t::SystemClockSwitch::CS_PLL);
+    RCC_t::setPLLM (4);
+    RCC_t::setPLLN (168);
+    RCC_t::setPLLP (RCC_t::PLLPdiv::PLLdiv2);
+//  RCC_t::setPLLQ (4);
+    RCC_t::setPLLsource (RCC_t::PLLsource::sHSE);
+    RCC_t::PLLon ();
+    RCC_t::waitPLLready ();
 }
 
-template <class T>
-static inline void SetLed (void)
-{
-    T::SetModer (Mode_t::OutputMode);
-    T::SetOutputType (OutputType_t::PushPull);
-	T::SetOutputSpeed (OutputSpeed_t::HighSpeed);
-	T::SetPullResistor (PullResistor_t::No);
-};
 
 inline void PortsInit (void)
 {
 	LedPort::ClockEnable();
 
-    SetLed <Bled> ();
-    SetLed <Rled> ();
-    SetLed <Oled> ();
-    SetLed <Gled> ();
-}
-
-inline void TimeEventInit (void)
-{
-	TimerSetTimeAndStart (BledTimer, 60);
-	TimerSetTimeAndStart (GledTimer, 61);
-	TimerSetTimeAndStart (OledTimer, 62);
-	TimerSetTimeAndStart (RledTimer, 63);
+    Bled::Configure (GPIO_t::Mode_t::OutputMode,
+                     GPIO_t::OutType_t::PushPull,
+                     GPIO_t::OutSpeed_t::High,
+                     GPIO_t::PullResistor_t::No);
+    Rled::Configure (GPIO_t::Mode_t::OutputMode,
+                     GPIO_t::OutType_t::PushPull,
+                     GPIO_t::OutSpeed_t::High,
+                     GPIO_t::PullResistor_t::No);
+    Oled::Configure (GPIO_t::Mode_t::OutputMode,
+                     GPIO_t::OutType_t::PushPull,
+                     GPIO_t::OutSpeed_t::High,
+                     GPIO_t::PullResistor_t::No);
+    Gled::Configure (GPIO_t::Mode_t::OutputMode,
+                     GPIO_t::OutType_t::PushPull,
+                     GPIO_t::OutSpeed_t::High,
+                     GPIO_t::PullResistor_t::No);
 }
 
 inline void PWMinit (void)

@@ -5,6 +5,8 @@ volatile uint32_t jj = 0;
 
 int main(void)
 {
+    makeDebugVar();
+
     // инициализация системных частот
     CLKinit ();
     PortsInit ();
@@ -13,7 +15,10 @@ int main(void)
     // инициализация таймера с шим
     PWMinit ();
 	// инициализация программных таймеров задач
-    TimeEventInit ();
+	TimerSetTimeAndStart (BledTimer, 500);
+	TimerSetTimeAndStart (GledTimer, 61);
+	TimerSetTimeAndStart (OledTimer, 62);
+	TimerSetTimeAndStart (RledTimer, 63);
 
 	while (1)
 	{
