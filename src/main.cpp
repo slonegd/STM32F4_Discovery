@@ -1,44 +1,45 @@
 #include "init.h"
 
-volatile uint32_t ii = 0;
-volatile uint32_t jj = 0;
+Timers bLedTimer;
+Timers gLedTimer;
+Timers oLedTimer;
+Timers rLedTimer;
 
 int main(void)
 {
-    makeDebugVar();
-
     // инициализация системных частот
     CLKinit ();
     PortsInit ();
     // инициализация аппаратного таймера 1мс
-    TimerInit ();
+    Timers::msHardvareInit();
     // инициализация таймера с шим
     PWMinit ();
-	// инициализация программных таймеров задач
-	TimerSetTimeAndStart (BledTimer, 500);
-	TimerSetTimeAndStart (GledTimer, 61);
-	TimerSetTimeAndStart (OledTimer, 62);
-	TimerSetTimeAndStart (RledTimer, 63);
+    // инициализация программных таймеров задач
+    bLedTimer.setTimeAndStart (500);
+    gLedTimer.setTimeAndStart (61);
+    oLedTimer.setTimeAndStart (62);
+    rLedTimer.setTimeAndStart (63);
 
 	while (1)
 	{
-        TimersUpdate ();
+        Timers::update();
 
-        if ( TimerEvent (BledTimer) ) {
-            ii++;
+        if ( bLedTimer.event() ) {
             Bled::Invert();
         }
-        if ( TimerEvent (GledTimer) ) {
-            jj++;
+
+        if ( gLedTimer.event() ) {
             Gled::Invert();
         }
-        if ( TimerEvent (OledTimer) ) {
+
+        if ( oLedTimer.event() ) {
             Oled::Invert();
         }
-        if ( TimerEvent (RledTimer) ) {
+
+        if ( rLedTimer.event() ) {
             Rled::Invert();
         }
-    }
+    } // while (1)
 }
 
 
@@ -49,5 +50,5 @@ int main(void)
 *****************************************************************************/
 extern "C" void SysTick_Handler (void)
 {
-    TimerInc();
+    Timers::tick();
 }

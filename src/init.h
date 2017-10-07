@@ -1,13 +1,11 @@
 #pragma once
-#ifndef INIT_H
-#define INIT_H
 
 #include <stdint.h>
 #include "defines.h"
 #include "usrlib/stm32f4_bf.hpp"
 #include "usrlib/stm32f4_llul.h"
-#include "usrlib/timer.h"
 #include "usrlib/tim2-5.hpp"
+#include "usrlib/timers.h"
 
 
 inline void CLKinit (void)
@@ -56,4 +54,3 @@ inline void PWMinit (void)
 	T2::CountEnable ();
 }
 
-#endif // INIT_H

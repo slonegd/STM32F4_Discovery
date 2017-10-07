@@ -4,15 +4,8 @@
 #include "usrlib/uc_hal/stm32f4_ral/RCC_ral.h"
 #include "usrlib/uc_hal/stm32f4_ral/DebugVar.h"
 
-#define F_CPU   168000000UL
 
-typedef enum {
-	BledTimer	= 0,
-	RledTimer,
-	OledTimer,
-	GledTimer,
-	QtyTimers
-} eTimer_t;
+#define F_CPU   168000000UL
 
 // discoveri leds
 typedef PD LedPort;

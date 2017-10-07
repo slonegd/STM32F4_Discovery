@@ -70,8 +70,8 @@ PERIFLIB_SOURCES =
 #######################################
 # binaries
 #######################################
-PREFIX = arm-none-eabi-
-#PREFIX = /home/slonegd/Code/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-
+#PREFIX = arm-none-eabi-
+PREFIX = /home/slonegd/Code/gcc-arm-none-eabi-6-2017-q2-update/bin/arm-none-eabi-
 #CC = $(BINPATH)/$(PREFIX)gcc
 CPP = $(PREFIX)g++
 CC = $(PREFIX)gcc
@@ -112,6 +112,7 @@ AS_INCLUDES =
 C_INCLUDES =  
 C_INCLUDES += -Iinc 
 C_INCLUDES += -Iinc/CMSIS 
+C_INCLUDES += -Isrc 
 
 
 
@@ -160,7 +161,7 @@ $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) -std=c99 -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.cpp Makefile | $(BUILD_DIR) 
-	$(CPP) -c $(CFLAGS) -std=c++11 -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.cpp=.lst)) $< -o $@
+	$(CPP) -c $(CFLAGS) -std=c++14 -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.cpp=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@
@@ -186,7 +187,13 @@ clean:
 
 flash_stlink:
 #	/home/dvk/code/stlink/build/Release/st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
-	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
+	/home/slonegd/Code/stlink/build/Release/st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
+#	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
+
+util:
+	/home/slonegd/Code/stlink/build/Release/src/gdbserver/st-util
+
+debug: clean all flash_stlink util
   
 #######################################
 # dependencies
