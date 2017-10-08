@@ -1,9 +1,10 @@
 #include "init.h"
 
-Timers bLedTimer;
-Timers gLedTimer;
-Timers oLedTimer;
-Timers rLedTimer;
+Timers<4> timers;
+Timer& bLedTimer = timers.all[0];
+Timer& gLedTimer = timers.all[1];
+Timer& oLedTimer = timers.all[2];
+Timer& rLedTimer = timers.all[3];
 
 int main(void)
 {
@@ -11,18 +12,18 @@ int main(void)
     CLKinit ();
     PortsInit ();
     // инициализация аппаратного таймера 1мс
-    Timers::msHardvareInit();
+    timers.msHardvareInit();
     // инициализация таймера с шим
     PWMinit ();
     // инициализация программных таймеров задач
     bLedTimer.setTimeAndStart (500);
-    gLedTimer.setTimeAndStart (61);
-    oLedTimer.setTimeAndStart (62);
-    rLedTimer.setTimeAndStart (63);
+    gLedTimer.setTimeAndStart (100);
+    oLedTimer.setTimeAndStart (150);
+    rLedTimer.setTimeAndStart (170);
 
 	while (1)
 	{
-        Timers::update();
+        timers.update();
 
         if ( bLedTimer.event() ) {
             Bled::Invert();
@@ -50,5 +51,5 @@ int main(void)
 *****************************************************************************/
 extern "C" void SysTick_Handler (void)
 {
-    Timers::tick();
+    timers.tick();
 }
