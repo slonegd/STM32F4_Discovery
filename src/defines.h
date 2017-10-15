@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pin_hal.h"
+#include "pinlist.h"
 #include "RCC_ral.h"
 #include "DebugVar.h"
 
@@ -14,3 +15,4 @@ using Rled = Pin_t<PD,14>;
 using Oled = Pin_t<PD,13>;
 using Gled = Pin_t<PD,12>;
 
+using Leds = PinList<Bled, Gled, Oled, Rled>;
