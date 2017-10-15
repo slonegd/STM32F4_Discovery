@@ -3,7 +3,7 @@
  * bf - bit fields
  */
 #include <stdint.h>
-#include "../inc/stm32f4xx.h"
+#include "stm32f4xx.h"
 
 #ifndef STM32F4_BF_H
 #define STM32F4_BF_H

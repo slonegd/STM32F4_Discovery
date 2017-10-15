@@ -9,7 +9,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "uc_hal/sysTick_hal.h"
+#include "SysTick_hal.h"
 
 struct Timer
 {
@@ -62,10 +62,11 @@ public:
     inline void update (void)
     {
         if (TickCount > 0) {
-            for (uint8_t i = 0; i < qty && all[i].enable; i++) {
-                all[i].timePassed = (all[i].timePassed < all[i].timeSet)
-                                     ? all[i].timePassed+TickCount : all[i].timePassed;
-                all[i].counted = (all[i].timePassed >= all[i].timeSet);
+            for (uint8_t i = 0; i < qty; i++) {
+                if (all[i].enable && !all[i].counted) {
+                    all[i].timePassed = all[i].timePassed+TickCount;
+                    all[i].counted = all[i].timePassed >= all[i].timeSet;
+                }
             }
             TickCount = 0;
         }

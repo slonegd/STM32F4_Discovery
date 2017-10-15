@@ -1,13 +1,28 @@
 #include "init.h"
 
+#include "pinlist.h"
+
+using Leds = MakePinList<0, Bled, Gled, Oled, Rled>::Result;
+using LedsPort = Bled::Port;
+//using PortsList =  PinListProperties<Leds>::PinsToPorts;
+using LedsPorts = PinListProperties<Leds>::Ports;
+volatile uint8_t l = PinListProperties<Leds>::Length;
+volatile uint8_t k = Loki::TL::Length<LedsPorts>::value;
+volatile uint32_t j = GetPortMask<Leds>::value;
+
+
+
+
 Timers<4> timers;
-Timer& bLedTimer = timers.all[0];
-Timer& gLedTimer = timers.all[1];
-Timer& oLedTimer = timers.all[2];
-Timer& rLedTimer = timers.all[3];
+auto& bLedTimer = timers.all[0];
+auto& gLedTimer = timers.all[1];
+auto& oLedTimer = timers.all[2];
+auto& rLedTimer = timers.all[3];
 
 int main(void)
 {
+    makeDebugVar();
+    
     // инициализация системных частот
     CLKinit ();
     PortsInit ();
@@ -16,9 +31,9 @@ int main(void)
     // инициализация таймера с шим
     PWMinit ();
     // инициализация программных таймеров задач
-    bLedTimer.setTimeAndStart (500);
-    gLedTimer.setTimeAndStart (100);
-    oLedTimer.setTimeAndStart (150);
+    bLedTimer.setTimeAndStart (l);
+    gLedTimer.setTimeAndStart (k);
+    oLedTimer.setTimeAndStart (j);
     rLedTimer.setTimeAndStart (170);
 
 	while (1)

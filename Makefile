@@ -112,9 +112,14 @@ AS_INCLUDES =
 C_INCLUDES =  
 C_INCLUDES += -Iinc 
 C_INCLUDES += -Iinc/CMSIS 
-C_INCLUDES += -Isrc 
-
-
+C_INCLUDES += -Isrc
+C_INCLUDES += -Isrc/usrlib 
+C_INCLUDES += -Isrc/usrlib/uc_hal
+C_INCLUDES += -Isrc/usrlib/uc_hal/stm32f4_ral
+C_INCLUDES += -Isrc/mcucpp 
+C_INCLUDES += -Isrc/mcucpp/impl
+C_INCLUDES += -Isrc/mcucpp/loki
+C_INCLUDES += -Isrc/mcucpp/libintegration
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections

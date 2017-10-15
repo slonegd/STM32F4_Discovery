@@ -9,7 +9,9 @@
 
 #pragma once
 
-#include "stm32f4_ral/GPIO_ral.h"
+#include "port_hal.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 
 template <class PORT, uint8_t pin>
@@ -31,20 +33,9 @@ public:
         PORT::pupd().reg    |=  (uint32_t)res   << pin;
     }
 
-    inline static bool IsSet (void)
-    {
-        return ( PORT::id().reg & (uint16_t)1<<pin );
-    }
-
-    inline static void Set (void)
-    {
-        PORT::WriteSet (1<<pin);
-    }
-    inline static void Reset (void)
-    {
-        PORT::WriteReset (1<<pin);
-    }
-    inline static void Invert (void)
+    // мои старые методы
+    static void Reset() { PORT::WriteReset (1<<pin); }
+    static void Invert()
     {
         if ( IsSet() ) {
             Reset();
@@ -52,6 +43,49 @@ public:
             Set();
         }
     }
+
+    // далее идут поля для интеграции с Mcucpp
+    typedef PORT Port;
+    static const unsigned Number = pin;
+    static const bool Inverted = false;
+
+    static void Set()           { PORT::template Set<1u << pin> (); }
+    static void Clear()         { PORT::template Clear<1u << pin> (); }
+    static void Toggle()        { PORT::template Toggle<1u << pin> (); }
+    static void Set(bool b)
+    {
+        if (b) {
+            Set();
+        } else {
+            Clear();
+        }
+    }
+    static bool IsSet()        { return ( (PORT::PinRead() & (1u << pin) ) != 0); }
+    static void WaitForSet()   { while( IsSet() == 0) {} }
+    static void WaitForClear() { while( IsSet() ) {} }
+
+    // конфигурацию пока оставлю как есть
+    /*
+    static void SetDir(uint8_t val);
+   
+    static void SetDirRead();
+    static void SetDirWrite();
+    static void SetConfiguration(Configuration configuration);
+    
+    static void SetDriverType(DriverType driverType);
+    static void SetPullUp(PullMode pullMode);
+    static void SetSpeed(Speed speed);
+    static void AltFuncNumber(uint8_t funcNumber);
+
+    template<Configuration configuration>
+    static void SetConfiguration()
+    {
+        ConfigPort:: template SetConfiguration<1 << PIN, configuration>();
+    }
+    */
+
+
+
 };
 
 

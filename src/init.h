@@ -2,10 +2,10 @@
 
 #include <stdint.h>
 #include "defines.h"
-#include "usrlib/stm32f4_bf.hpp"
-#include "usrlib/stm32f4_llul.h"
-#include "usrlib/tim2-5.hpp"
-#include "usrlib/timers.h"
+#include "stm32f4_bf.hpp"
+#include "stm32f4_llul.h"
+#include "tim2-5.hpp"
+#include "timers.h"
 
 
 inline void CLKinit (void)
