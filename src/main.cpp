@@ -2,6 +2,8 @@
 
 uint16_t i = 0;
 
+PWM<PWMtimer, PWMout> pwm;
+
 Timers<1> timers;
 auto& ledTimer = timers.all[0];
 
@@ -13,12 +15,11 @@ int main(void)
     // инициализация системных частот
     CLKinit ();
     PortsInit ();
-    // инициализация аппаратного таймера 1мс
-    timers.msHardvareInit();
+
     // инициализация таймера с шим
-    PWMinit ();
+
     // инициализация программных таймеров задач
-    ledTimer.setTimeAndStart (100);
+    ledTimer.setTimeAndStart (500);
    
 
 	while (1)
@@ -27,6 +28,7 @@ int main(void)
 
         if ( ledTimer.event() ) {
             Leds::Write(i++);
+            pwm.stop();
         }
 
     } // while (1)

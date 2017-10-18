@@ -5,10 +5,11 @@
 template <uint32_t PortPtr, uint32_t ClkEnMask, int ID>
 class Port_t : protected GPIO_t
 {
-    using Mode_t = MODER_t::Mode_t;
-    using OutType_t = OTYPER_t::OutType_t;
-    using OutSpeed_t = OSPEEDR_t::OutSpeed_t;
-    using PullResistor_t = PUPDR_t::PullResistor_t;
+/*public:
+    using Mode = MODER_t::Mode_t;
+    using OutType = OTYPER_t::OutType_t;
+    using OutSpeed = OSPEEDR_t::OutSpeed_t;
+    using PullResistor = PUPDR_t::PullResistor_t;*/
 protected:
     static volatile MODER_t   &mode()   { return (MODER_t &)  (*(GPIO_TypeDef*)PortPtr).MODER;   }
     static volatile OTYPER_t  &otype()  { return (OTYPER_t &) (*(GPIO_TypeDef*)PortPtr).OTYPER;  }
@@ -17,13 +18,10 @@ protected:
     static volatile ODR_t     &od()     { return (ODR_t &)    (*(GPIO_TypeDef*)PortPtr).ODR;     }
     static volatile IDR_t     &id()     { return (IDR_t &)    (*(GPIO_TypeDef*)PortPtr).IDR;     }
     static volatile BSRR_t    &bsr()    { return (BSRR_t &)   (*(GPIO_TypeDef*)PortPtr).BSRR;    }
+    static volatile AFR_t     &af()     { return (AFR_t &)    (*(GPIO_TypeDef*)PortPtr).AFR[0];  }
 public:
-    // мои старые методы убрал инлайн 
     static void ClockEnable (void)          { RCC->AHB1ENR |= ClkEnMask; }
-    static void WriteSet (uint16_t val)     { bsr().reg = val; }
-    static void WriteReset (uint16_t val)   { bsr().reg = val << 16; }
 
-    // далее идут поля для интеграции с Mcucpp
     static uint16_t Read()                  { return od.reg; }  
     static void Write (uint16_t val)        { od.reg = val; }
     static void Set (uint16_t val)          { bsr().reg = val; }

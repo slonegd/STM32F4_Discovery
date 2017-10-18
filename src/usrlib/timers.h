@@ -49,7 +49,7 @@ public:
     Timer all[qty];
 public:
     // инициализация и включение прерываний аппаратного таймера каждую мс
-    inline void msHardvareInit (void)
+    Timers (void)
     {
         InitSysTimerInt<1> ();
     }

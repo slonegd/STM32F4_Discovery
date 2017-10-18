@@ -31,8 +31,8 @@ OPT = -O2
 # source path
 SOURCES_DIR =  
 SOURCES_DIR += Application 
-SOURCES_DIR += inc 
-SOURCES_DIR += inc/CMSIS 
+SOURCES_DIR += mcu_files 
+SOURCES_DIR += mcu_files/CMSIS 
 SOURCES_DIR += src 
 SOURCES_DIR += src/usrlib
 SOURCES_DIR += src/usrlib/uc_hal
@@ -49,16 +49,15 @@ BUILD_DIR = build
 # source
 ######################################
 # C sources
-C_SOURCES = inc/system_stm32f4xx.c 
+C_SOURCES = mcu_files/system_stm32f4xx.c 
  
 # C++ sourses
 CPP_SOURCES = 
 CPP_SOURCES += src/main.cpp 
-CPP_SOURCES += src/usrlib/stm32f4_bf.cpp 
-#CPP_SOURCES += src/usrlib/uc_hal/stm32f4_ral/DebugVar.cpp
+
 
 # ASM sources
-ASM_SOURCES = startup/startup_stm32f405xx.s
+ASM_SOURCES = mcu_files/startup_stm32f405xx.s
 
 
 ######################################
@@ -70,9 +69,8 @@ PERIFLIB_SOURCES =
 #######################################
 # binaries
 #######################################
-#PREFIX = arm-none-eabi-
-PREFIX = /home/slonegd/Code/gcc-arm-none-eabi-6-2017-q2-update/bin/arm-none-eabi-
-#CC = $(BINPATH)/$(PREFIX)gcc
+PREFIX = arm-none-eabi-
+#PREFIX = /home/slonegd/Code/gcc-arm-none-eabi-6-2017-q2-update/bin/arm-none-eabi-
 CPP = $(PREFIX)g++
 CC = $(PREFIX)gcc
 AS = $(PREFIX)gcc -x assembler-with-cpp
@@ -110,16 +108,13 @@ AS_INCLUDES =
 
 # C includes
 C_INCLUDES =  
-C_INCLUDES += -Iinc 
-C_INCLUDES += -Iinc/CMSIS 
-C_INCLUDES += -Isrc
+C_INCLUDES += -Imcu_files 
+C_INCLUDES += -Imcu_files/CMSIS 
+C_INCLUDES += -Isrc 
 C_INCLUDES += -Isrc/usrlib 
 C_INCLUDES += -Isrc/usrlib/uc_hal
 C_INCLUDES += -Isrc/usrlib/uc_hal/stm32f4_ral
-C_INCLUDES += -Isrc/mcucpp 
-C_INCLUDES += -Isrc/mcucpp/impl
-C_INCLUDES += -Isrc/mcucpp/loki
-C_INCLUDES += -Isrc/mcucpp/libintegration
+
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
@@ -139,7 +134,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)"
 # LDFLAGS
 #######################################
 # link script
-LDSCRIPT = linker/STM32F405RGTx_FLASH.ld
+LDSCRIPT = mcu_files/STM32F405RGTx_FLASH.ld
 
 # libraries
 LIBS = -lc -lm -lnosys
@@ -166,7 +161,7 @@ $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) -std=c99 -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.cpp Makefile | $(BUILD_DIR) 
-	$(CPP) -c $(CFLAGS) -std=c++14 -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.cpp=.lst)) $< -o $@
+	$(CPP) -c $(CFLAGS) -std=c++11 -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.cpp=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@
@@ -192,8 +187,8 @@ clean:
 
 flash_stlink:
 #	/home/dvk/code/stlink/build/Release/st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
-	/home/slonegd/Code/stlink/build/Release/st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
-#	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
+#	/home/slonegd/Code/stlink/build/Release/st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
+	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
 
 util:
 	/home/slonegd/Code/stlink/build/Release/src/gdbserver/st-util

@@ -18,10 +18,20 @@ template <class PORT, uint8_t pin>
 class Pin_t : protected PORT
 {
 public:
-    inline static void Configure ( GPIO_t::Mode_t mode,
-                                   GPIO_t::OutType_t type,
-                                   GPIO_t::OutSpeed_t speed,
-                                   GPIO_t::PullResistor_t res)
+    using Port = PORT;
+    using Mode = GPIO_t::MODER_t::Mode_t;
+    using OutType = GPIO_t::OTYPER_t::OutType_t;
+    using OutSpeed = GPIO_t::OSPEEDR_t::OutSpeed_t;
+    using PullResistor = GPIO_t::PUPDR_t::PullResistor_t;
+    using AF = GPIO_t::AFR_t::AF;
+
+    static const unsigned Number = pin;
+    static const bool Inverted = false;
+
+    inline static void Configure ( Mode mode,
+                                   OutType type,
+                                   OutSpeed speed,
+                                   PullResistor res)
     {
         PORT::mode().reg    &= ~((uint32_t)0b11 << pin*2);
         PORT::mode().reg    |=  (uint32_t)mode  << pin*2;
@@ -32,22 +42,13 @@ public:
         PORT::pupd().reg    &= ~((uint32_t)0b1  << pin);
         PORT::pupd().reg    |=  (uint32_t)res   << pin;
     }
-
-    // мои старые методы
-    static void Reset() { PORT::WriteReset (1<<pin); }
-    static void Invert()
+    template <AF func>
+    static void SetAltFunc()
     {
-        if ( IsSet() ) {
-            Reset();
-        } else {
-            Set();
-        }
+        constexpr uint8_t reg = pin / 8;
+        constexpr uint32_t mask = (uint32_t)func << pin/(reg+1)*4;
+        PORT::af().reg[reg] |= mask;
     }
-
-    // далее идут поля для интеграции с Mcucpp
-    typedef PORT Port;
-    static const unsigned Number = pin;
-    static const bool Inverted = false;
 
     static void Set()           { PORT::template Set<1u << pin> (); }
     static void Clear()         { PORT::template Clear<1u << pin> (); }
@@ -63,6 +64,7 @@ public:
     static bool IsSet()        { return ( (PORT::PinRead() & (1u << pin) ) != 0); }
     static void WaitForSet()   { while( IsSet() == 0) {} }
     static void WaitForClear() { while( IsSet() ) {} }
+    
 
     // конфигурацию пока оставлю как есть
     /*

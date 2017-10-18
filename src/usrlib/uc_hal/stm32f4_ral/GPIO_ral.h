@@ -152,6 +152,38 @@ struct BSRR_t
     uint32_t reg;
 };
 
+struct LCKR_t
+{
+    uint32_t reg;
+};
+
+struct AFR_t
+{
+    enum AF {
+        AF0 = 0b0000,
+        AF1 = 0b0001,
+        AF2, AF3, AF4, AF5, AF6, AF7, AF8, AF9,
+        AF10, AF11, AF12, AF13, AF14, AF15
+    };
+    struct AFRbits_t {
+        volatile AF AFR0    : 4;
+        volatile AF AFR1    : 4;
+        volatile AF AFR2    : 4;
+        volatile AF AFR3    : 4;
+        volatile AF AFR4    : 4;
+        volatile AF AFR5    : 4;
+        volatile AF AFR6    : 4;
+        volatile AF AFR7    : 4;
+    };
+    union {
+        struct {
+            volatile AFRbits_t bitsL;
+            volatile AFRbits_t bitsH;
+        };
+        uint32_t reg[2];
+    };
+};
+
 /*
 typedef struct
 {
@@ -173,7 +205,9 @@ class GPIO_t : public MODER_t,
                public PUPDR_t,
                public IDR_t,
                public ODR_t,
-               public BSRR_t
+               public BSRR_t,
+               public LCKR_t,
+               public AFR_t
 //LCKR AFR пока не нужны
 {
 

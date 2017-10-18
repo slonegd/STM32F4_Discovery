@@ -2,15 +2,12 @@
 
 #include <stdint.h>
 #include "defines.h"
-#include "stm32f4_bf.hpp"
-#include "stm32f4_llul.h"
-#include "tim2-5.hpp"
 #include "timers.h"
 
 
 inline void CLKinit (void)
 {
-	FLASH_SetLatency (Latency_t::latency_5);
+    FLASH_t::SetLatency (FLASH_t::Latency::latency_5);
     RCC_t::HSEon ();
     RCC_t::waitHSEready ();
     RCC_t::setAHBprescaler (RCC_t::AHBprescaler::AHBnotdiv);
@@ -31,26 +28,23 @@ inline void PortsInit (void)
 {
 	LedPort::ClockEnable();
 
-    Bled::Configure (GPIO_t::Mode_t::OutputMode,
-                     GPIO_t::OutType_t::PushPull,
-                     GPIO_t::OutSpeed_t::High,
-                     GPIO_t::PullResistor_t::No);
-    Rled::Configure (GPIO_t::Mode_t::OutputMode,
-                     GPIO_t::OutType_t::PushPull,
-                     GPIO_t::OutSpeed_t::High,
-                     GPIO_t::PullResistor_t::No);
-    Oled::Configure (GPIO_t::Mode_t::OutputMode,
-                     GPIO_t::OutType_t::PushPull,
-                     GPIO_t::OutSpeed_t::High,
-                     GPIO_t::PullResistor_t::No);
-    Gled::Configure (GPIO_t::Mode_t::OutputMode,
-                     GPIO_t::OutType_t::PushPull,
-                     GPIO_t::OutSpeed_t::High,
-                     GPIO_t::PullResistor_t::No);
+    Bled::Configure (Bled::Mode::OutputMode,
+                     Bled::OutType::PushPull,
+                     Bled::OutSpeed::High,
+                     Bled::PullResistor::No);
+    Rled::Configure (Rled::Mode::OutputMode,
+                     Rled::OutType::PushPull,
+                     Rled::OutSpeed::High,
+                     Rled::PullResistor::No);
+    Oled::Configure (Oled::Mode::OutputMode,
+                     Oled::OutType::PushPull,
+                     Oled::OutSpeed::High,
+                     Oled::PullResistor::No);
+    Gled::Configure (Gled::Mode::OutputMode,
+                     Gled::OutType::PushPull,
+                     Gled::OutSpeed::High,
+                     Gled::PullResistor::No);
 }
 
-inline void PWMinit (void)
-{
-	T2::CountEnable ();
-}
+
 
