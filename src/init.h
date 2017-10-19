@@ -32,10 +32,10 @@ inline void PortsInit (void)
                      Bled::OutType::PushPull,
                      Bled::OutSpeed::High,
                      Bled::PullResistor::No);
-    Rled::Configure (Rled::Mode::OutputMode,
+/*    Rled::Configure (Rled::Mode::OutputMode,
                      Rled::OutType::PushPull,
                      Rled::OutSpeed::High,
-                     Rled::PullResistor::No);
+                     Rled::PullResistor::No);*/
     Oled::Configure (Oled::Mode::OutputMode,
                      Oled::OutType::PushPull,
                      Oled::OutSpeed::High,

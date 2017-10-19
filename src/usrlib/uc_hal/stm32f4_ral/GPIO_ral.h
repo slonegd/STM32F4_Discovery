@@ -174,11 +174,18 @@ struct AFR_t
         volatile AF AFR5    : 4;
         volatile AF AFR6    : 4;
         volatile AF AFR7    : 4;
+        volatile AF AFR8    : 4;
+        volatile AF AFR9    : 4;
+        volatile AF AFR10   : 4;
+        volatile AF AFR11   : 4;
+        volatile AF AFR12   : 4;
+        volatile AF AFR13   : 4;
+        volatile AF AFR14   : 4;
+        volatile AF AFR15   : 4;
     };
     union {
         struct {
-            volatile AFRbits_t bitsL;
-            volatile AFRbits_t bitsH;
+            volatile AFRbits_t bits;
         };
         uint32_t reg[2];
     };

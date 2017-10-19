@@ -41,6 +41,9 @@
                 "${workspaceRoot}/mcu_files",
                 "${workspaceRoot}/mcu_files",
                 "${workspaceRoot}/mcu_files",
+                "${workspaceRoot}/mcu_files",
+                "${workspaceRoot}/mcu_files",
+                "${workspaceRoot}/mcu_files",
                 "${workspaceRoot}/mcu_files"
             ],
             "defines": [],
