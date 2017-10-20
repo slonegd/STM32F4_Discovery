@@ -32,10 +32,6 @@ inline void PortsInit (void)
                      Bled::OutType::PushPull,
                      Bled::OutSpeed::High,
                      Bled::PullResistor::No);
-/*    Rled::Configure (Rled::Mode::OutputMode,
-                     Rled::OutType::PushPull,
-                     Rled::OutSpeed::High,
-                     Rled::PullResistor::No);*/
     Oled::Configure (Oled::Mode::OutputMode,
                      Oled::OutType::PushPull,
                      Oled::OutSpeed::High,
@@ -44,6 +40,8 @@ inline void PortsInit (void)
                      Gled::OutType::PushPull,
                      Gled::OutSpeed::High,
                      Gled::PullResistor::No);
+
+    Button::Port::ClockEnable();
 }
 
 

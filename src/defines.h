@@ -17,8 +17,9 @@ using Bled = PD15;
 using Rled = PD14;
 using Oled = PD13;
 using Gled = PD12;
-
 using Leds = PinList<Bled, Gled, Oled>;
+
+using Button = PA0;
 
 using PWMout = Rled;
 using PWMtimer = TIM4_t;

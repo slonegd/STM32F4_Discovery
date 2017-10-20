@@ -2,7 +2,7 @@
 
 uint16_t i = 0;
 volatile uint8_t j = 0;
-bool goUp = true;
+
 
 PWM<PWMtimer, PWMout> pwm;
 
@@ -13,6 +13,9 @@ auto& pwmTimer = timers.all[1];
 
 int main(void)
 {
+    bool butActDone = false;
+    bool goUp = true;
+    
     makeDebugVar();
     
     // инициализация системных частот
@@ -20,7 +23,7 @@ int main(void)
     PortsInit ();
 
     // инициализация таймера с шим
-    PWMtimer::SetARR (0x00FF);
+    pwm.SetFreq (0x00FF);
     pwm.start();
 
     // инициализация программных таймеров задач
@@ -41,8 +44,20 @@ int main(void)
             goUp =  (j == 255) ? false :
                     (j == 0)   ? true  :
                                  goUp;
-            PWMtimer::SetCCR3 (j);
+            PWMtimer::SetCompareValue <3> (j);
         }
+
+        if (!Button::IsSet()) {
+            butActDone = false;
+        } else if (!butActDone) {
+            butActDone = true;
+            if ( pwm.IsCompareEnable() ) {
+                pwm.stop();
+            } else {
+                pwm.start();
+            }
+        }
+
 
     } // while (1)
 }

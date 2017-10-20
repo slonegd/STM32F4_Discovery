@@ -184,6 +184,27 @@ struct CCER_t {
     };
 };
 
+struct CNT_t {
+    uint32_t reg;
+};
+
+struct PSC_t {
+    uint32_t reg;
+};
+
+struct ARR_t {
+    uint32_t reg;
+};
+
+struct RCR_t {
+    uint32_t reg;
+};
+
+struct CCR_t {
+    uint32_t regs[4];
+};
+
+
 /*
 typedef struct
 {
@@ -218,7 +239,12 @@ struct TIM_t : public CR1_t,
                public SR_t,
                public EGR_t,
                public CCMR_t,
-               public CCER_t
+               public CCER_t,
+               public CNT_t,
+               public PSC_t,
+               public ARR_t,
+               public RCR_t,
+               public CCR_t
 {
 
 };
@@ -235,12 +261,13 @@ protected:
     static volatile CCMR_t &ccm()   { return (CCMR_t &)   (*(TIM_TypeDef*)TIMptr).CCMR1; }
     static volatile CCER_t &cce()   { return (CCER_t &)   (*(TIM_TypeDef*)TIMptr).CCER; }
     static volatile uint32_t &ar()  { return (uint32_t &) (*(TIM_TypeDef*)TIMptr).ARR; }
-    static volatile uint32_t &cc3() { return (uint32_t &) (*(TIM_TypeDef*)TIMptr).CCR3; }
+    static volatile CCR_t &cc()     { return (CCR_t &)    (*(TIM_TypeDef*)TIMptr).CCR1; }
 
 public:
     // включает тактирование таймера
     static inline void ClockEnable() { *((uint32_t*)(RCC_BASE + ClkEnOffset)) |= ClkEnMask; }
     static inline void CounterEnable()    { c1().bits.CEN = true; }
+    static inline bool IsCount()          { return c1().bits.CEN; }
     static inline void CounterDisable()   { c1().bits.CEN = false; }
     static inline void AutoReloadEnable() { c1().bits.ARPE = true; }
     template <CompareMode cm, uint8_t channel>
@@ -259,8 +286,20 @@ public:
     {
         cce().reg |= (uint16_t)1 << (channel-1)*4;
     }
-    static inline void SetARR (uint32_t val) { ar() = val; }
-    static inline void SetCCR3 (uint32_t val) { cc3() = val; }
+    template <uint8_t channel>
+    static inline void CompareDisable ()
+    {
+        cce().reg &= ~( (uint16_t)1 << (channel-1)*4 );
+    }
+    template <uint8_t channel>
+    static inline bool IsCompareEnable ()
+    {
+        return ( (cce().reg & ((uint16_t)1 << (channel-1)*4)) != 0);
+    }
+
+    static inline void SetAutoReloadValue (uint32_t val) { ar() = val; }
+    template <uint8_t channel>
+    static inline void SetCompareValue (uint32_t val) { cc().regs[channel-1] = val; }
 };
 
 using TIM1_t = TIM<TIM1_BASE, 0x44, RCC_APB2ENR_TIM1EN_Msk, AFR_t::AF::AF1>;

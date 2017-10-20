@@ -37,15 +37,6 @@ public:
     // конфигурация (пока не все методы)
     static void Enable (void)  { RCC->AHB1ENR |= ClkEnMask; }
     static void Disable (void) { RCC->AHB1ENR &= ~ClkEnMask; }
-/*    template<unsigned pin, class Config>
-    static void SetPinConfiguration(Config)
-    {}
-    template<class Config>
-    static void SetConfiguration(DataT, Config)
-    {}
-    template<DataT mask, Configuration>
-    static void SetConfiguration()
-    {}*/
 
     // методы шаблоны
     template<uint16_t clearMask, uint16_t val> static void ClearAndSet()
