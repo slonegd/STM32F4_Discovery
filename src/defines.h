@@ -2,6 +2,7 @@
 
 #include "pin_hal.h"
 #include "pinlist.h"
+#include "eeprom.h"
 #include "TIM_ral.h"
 #include "pwm_hal.h"
 #include "RCC_ral.h"

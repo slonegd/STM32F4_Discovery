@@ -8,6 +8,13 @@ auto& butTimer = timers.all[1];
 
 PWM<PWMtimer, PWMout> pwm;
 
+struct EEPROMdata {
+    uint16_t d1;
+    uint16_t d2;
+};
+
+EEPROM<EEPROMdata, 2> eeprom;
+
 int main(void)
 {
     makeDebugVar();
@@ -16,11 +23,19 @@ int main(void)
     CLKinit ();
     PortsInit ();
 
+    // eeprom
+    if ( !eeprom.readFromFlash() ) {
+        eeprom.data.d1 = 1;
+        eeprom.data.d2 = 3;
+    }
+
+
     // инициализация таймера с шим
     // прескаллер спецом, чтбы было видно на индикаторе высокие частоты
     PWMtimer::SetPrescaller (10000);
     pwm.setFreq (10000);
     pwm.setD (50);
+    pwm.outEnable();
 
     // инициализация программных таймеров задач
     ledTimer.setTimeAndStart (500);
