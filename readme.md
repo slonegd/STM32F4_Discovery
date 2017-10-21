@@ -42,4 +42,6 @@ v0.18   продолжил TIM_ral и pwm_hal
 
 v0.19   pwm_hal в процессе
 
+v0.20   закончил pwm_hal
+
 

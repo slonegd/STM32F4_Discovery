@@ -37,6 +37,10 @@ struct Timer
             return (false);
         }
     }
+    inline void stop (void)
+    {
+        enable = false;
+    }
 };
 
 template<uint8_t qty>

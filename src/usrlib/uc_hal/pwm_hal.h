@@ -22,18 +22,18 @@ template <class Timer, class Pin>
 class PWM
 {
 private:
+    // частота в Гц
+    uint16_t freq;
+    // коэффициент заполнения в процентах
+    uint16_t d;
     // таймер считает до, зависит от частоты
     uint32_t countTo;
-    // сравнение с для ШИМ, зависит от частоты и от коэффициента заполнения
-    uint32_t compare;
     // для кокретизации пары таймер-пин
     void concretize (void);
+    // номер канала, завивист от парты таймер-пин, инициализируеться в макросе CONCRETIZE
     static const uint8_t channel;
-public:
-    PWM (void)
+    void init (void)
     {
-        concretize();
-
         Pin::Port::ClockEnable();
         Pin::Configure ( Pin::Mode::AlternateMode,
                          Pin::OutType::PushPull,
@@ -43,35 +43,34 @@ public:
          
         Timer::ClockEnable();
         Timer::AutoReloadEnable();
-        Timer::template CompareEnable <channel> ();
         Timer::template SetCompareMode <Timer::CompareMode::PWMmode, channel> ();
         Timer::CounterEnable();
     }
-
-    inline void start (void)
+public:
+    PWM () : d(0)
     {
-        Timer::template CompareEnable <channel>();
+        concretize();
+        init();
     }
-    inline void stop (void)
+    inline void outEnable (void)  { Timer::template CompareEnable <channel>(); }
+    inline void outDisable (void) { Timer::template CompareDisable <channel>(); }
+    inline bool isOutEnable ()    { return Timer::template IsCompareEnable<channel>(); }
+    inline void setFreq (uint32_t f)
     {
-        Timer::template CompareDisable <channel>();
-//        Pin::Clear();
+        extern uint32_t fCPU;
+        if ( (f != this->freq) && (f != 0) ) {
+            this->freq = f;
+            countTo = fCPU / f - 1;
+            Timer::SetAutoReloadValue (countTo);
+            setD (d);
+        }
     }
-    inline bool IsCompareEnable ()
+    // d - в процентах
+    inline void setD (uint8_t d)
     {
-        return Timer::template IsCompareEnable<channel>();
+        this->d = d;
+        Timer::template SetCompareValue <channel> (countTo * d / 100);
     }
-    inline void SetFreq (uint32_t f)
-    {
-        // временно
-        Timer::SetAutoReloadValue(f);
-    }
-    inline void SetD (uint16_t d)
-    {
-
-    }
-private:
-
 };
 
 #define CONCRETIZE(Timer, Pin, Channel) template<> \

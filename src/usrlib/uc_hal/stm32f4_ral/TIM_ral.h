@@ -256,20 +256,23 @@ public:
     using CompareMode = TIM_t::CCMR_t::CompareMode;
     static const AFR_t::AF AltFunc = af;
 protected:
-    static volatile CR1_t &c1()     { return (CR1_t &)    (*(TIM_TypeDef*)TIMptr).CR1; }
-    static volatile CR2_t &c2()     { return (CR2_t &)    (*(TIM_TypeDef*)TIMptr).CR2; }
+    static volatile CR1_t  &c1()    { return (CR1_t &)    (*(TIM_TypeDef*)TIMptr).CR1;   }
+    static volatile CR2_t  &c2()    { return (CR2_t &)    (*(TIM_TypeDef*)TIMptr).CR2;   }
     static volatile CCMR_t &ccm()   { return (CCMR_t &)   (*(TIM_TypeDef*)TIMptr).CCMR1; }
-    static volatile CCER_t &cce()   { return (CCER_t &)   (*(TIM_TypeDef*)TIMptr).CCER; }
-    static volatile uint32_t &ar()  { return (uint32_t &) (*(TIM_TypeDef*)TIMptr).ARR; }
-    static volatile CCR_t &cc()     { return (CCR_t &)    (*(TIM_TypeDef*)TIMptr).CCR1; }
+    static volatile CCER_t &cce()   { return (CCER_t &)   (*(TIM_TypeDef*)TIMptr).CCER;  }
+    static volatile PSC_t  &psc()   { return (PSC_t &)    (*(TIM_TypeDef*)TIMptr).PSC;   }
+    static volatile ARR_t  &ar()    { return (ARR_t &)    (*(TIM_TypeDef*)TIMptr).ARR;   }
+    static volatile CCR_t  &cc()    { return (CCR_t &)    (*(TIM_TypeDef*)TIMptr).CCR1;  }
 
 public:
     // включает тактирование таймера
-    static inline void ClockEnable() { *((uint32_t*)(RCC_BASE + ClkEnOffset)) |= ClkEnMask; }
+    static inline void ClockEnable()      { *((uint32_t*)(RCC_BASE + ClkEnOffset)) |= ClkEnMask; }
     static inline void CounterEnable()    { c1().bits.CEN = true; }
     static inline bool IsCount()          { return c1().bits.CEN; }
     static inline void CounterDisable()   { c1().bits.CEN = false; }
     static inline void AutoReloadEnable() { c1().bits.ARPE = true; }
+    static inline void SetAutoReloadValue (uint32_t val) { ar().reg = val; }
+    static inline void SetPrescaller (uint32_t val)      { psc().reg = val; }
     template <CompareMode cm, uint8_t channel>
     static inline void  SetCompareMode ()
     {
@@ -282,24 +285,14 @@ public:
         MODIFY_REG (ccm().regs[regN], ClearMask, SetMask);
     }
     template <uint8_t channel>
-    static inline void CompareEnable ()
-    {
-        cce().reg |= (uint16_t)1 << (channel-1)*4;
-    }
+    static inline void CompareEnable ()   { cce().reg |= (uint16_t)1 << (channel-1)*4; }
     template <uint8_t channel>
-    static inline void CompareDisable ()
-    {
-        cce().reg &= ~( (uint16_t)1 << (channel-1)*4 );
-    }
+    static inline void CompareDisable ()  { cce().reg &= ~( (uint16_t)1 << (channel-1)*4 ); }
     template <uint8_t channel>
-    static inline bool IsCompareEnable ()
-    {
-        return ( (cce().reg & ((uint16_t)1 << (channel-1)*4)) != 0);
-    }
-
-    static inline void SetAutoReloadValue (uint32_t val) { ar() = val; }
+    static inline bool IsCompareEnable () { return ( (cce().reg & ((uint16_t)1 << (channel-1)*4)) != 0); }
     template <uint8_t channel>
     static inline void SetCompareValue (uint32_t val) { cc().regs[channel-1] = val; }
+    
 };
 
 using TIM1_t = TIM<TIM1_BASE, 0x44, RCC_APB2ENR_TIM1EN_Msk, AFR_t::AF::AF1>;

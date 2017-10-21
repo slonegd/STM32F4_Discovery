@@ -155,6 +155,105 @@ struct CFGR_t {
     __IO Bits_t bits;
 };
 
+struct CIR_t {
+    uint32_t reg;
+};
+
+struct AHB1RSTR_t {
+    uint32_t reg;
+};
+
+struct AHB2RSTR_t {
+    uint32_t reg;
+};
+
+struct AHB3RSTR_t {
+    uint32_t reg;
+};
+
+struct RESERVED1_t {
+    uint32_t reg;
+};
+
+struct APB1RSTR_t {
+    uint32_t reg;
+};
+
+struct APB2RSTR_t {
+    uint32_t reg;
+};
+
+struct RESERVED2_t {
+    uint32_t reg;
+};
+
+struct RESERVED3_t {
+    uint32_t reg;
+};
+
+struct AHB1ENR_t {
+    uint32_t reg;
+};
+
+struct AHB2ENR_t {
+    uint32_t reg;
+};
+
+struct AHB3ENR_t {
+    uint32_t reg;
+};
+
+struct RESERVED4_t {
+    uint32_t reg;
+};
+
+struct APB1ENR_t {
+    enum { offset = 0x40 };
+    static const uint8_t Offset = 0x40;
+    struct APB1ENRbits {
+        volatile bool TIM2EN    :1;
+        volatile bool TIM3EN    :1;
+        volatile bool TIM4EN    :1;
+        volatile bool TIM5EN    :1;
+        volatile bool TIM6EN    :1;
+        volatile bool TIM7EN    :1;
+        volatile bool TIM12EN   :1;
+        volatile bool TIM13EN   :1;
+        volatile bool TIM14EN   :1;
+        uint32_t dcb1           :2;
+        volatile bool WWDGEN    :1;
+        uint32_t dcb2           :2;
+        volatile bool SPI2EN    :1;
+        volatile bool SPI3EN    :1;
+        uint32_t dcb3           :1;
+        volatile bool USART2EN  :1;
+        volatile bool USART3EN  :1;
+        volatile bool UART4EN   :1;
+        volatile bool UART5EN   :1;
+        volatile bool I2C1EN    :1;
+        volatile bool I2C2EN    :1;
+        volatile bool I2C3EN    :1;
+        uint32_t dcb4           :1;
+        volatile bool CAN1EN    :1;
+        volatile bool CAN2EN    :1;
+        uint32_t dcb5           :1;
+        volatile bool PWREN     :1;
+        volatile bool DACEN     :1;
+        uint32_t dcb6           :2;
+    };
+    union {
+        volatile APB1ENRbits bits;
+        volatile uint32_t reg;
+    };
+    
+};
+
+struct APB2ENR_t {
+    enum { offset = 0x44 };
+    static const uint8_t Offset = 0x44;
+    uint32_t reg;
+};
+
 
 
 
@@ -197,7 +296,22 @@ typedef struct
 
 class RCC_t : public CR_t,
               public PLLCFGR_t,
-              public CFGR_t
+              public CFGR_t,
+              public CIR_t,
+              public AHB1RSTR_t,
+              public AHB2RSTR_t,
+              public AHB3RSTR_t,
+              public RESERVED1_t,
+              public APB1RSTR_t,
+              public APB2RSTR_t,
+              public RESERVED2_t,
+              public RESERVED3_t,
+              public AHB1ENR_t,
+              public AHB2ENR_t,
+              public AHB3ENR_t,
+              public RESERVED4_t,
+              public APB1ENR_t,
+              public APB2ENR_t
 {
 public:	
     static volatile CR_t      &cr()     { return (CR_t &)          RCC->CR; }

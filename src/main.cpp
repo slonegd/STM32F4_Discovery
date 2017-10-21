@@ -1,34 +1,30 @@
 #include "init.h"
 
 uint16_t i = 0;
-volatile uint8_t j = 0;
-
-
-PWM<PWMtimer, PWMout> pwm;
 
 Timers<2> timers;
 auto& ledTimer = timers.all[0];
-auto& pwmTimer = timers.all[1];
+auto& butTimer = timers.all[1];
 
+PWM<PWMtimer, PWMout> pwm;
 
 int main(void)
 {
-    bool butActDone = false;
-    bool goUp = true;
-    
     makeDebugVar();
-    
+   
     // инициализация системных частот
     CLKinit ();
     PortsInit ();
 
     // инициализация таймера с шим
-    pwm.SetFreq (0x00FF);
-    pwm.start();
+    // прескаллер спецом, чтбы было видно на индикаторе высокие частоты
+    PWMtimer::SetPrescaller (10000);
+    pwm.setFreq (10000);
+    pwm.setD (50);
 
     // инициализация программных таймеров задач
     ledTimer.setTimeAndStart (500);
-    pwmTimer.setTimeAndStart (10);
+    butTimer.setTimeAndStart (200);
    
 
 	while (1)
@@ -39,25 +35,29 @@ int main(void)
             Leds::Write(i++);
         }
 
-        if ( pwmTimer.event() ) {
-            goUp ? j++ : j--;
-            goUp =  (j == 255) ? false :
-                    (j == 0)   ? true  :
-                                 goUp;
-            PWMtimer::SetCompareValue <3> (j);
-        }
+        if ( butTimer.event() ) {
+            bool butActDone = false;
+            static bool goUp = true;
+            static uint8_t d = 50;
 
-        if (!Button::IsSet()) {
-            butActDone = false;
-        } else if (!butActDone) {
-            butActDone = true;
-            if ( pwm.IsCompareEnable() ) {
-                pwm.stop();
-            } else {
-                pwm.start();
+            if ( !Button::IsSet() ) {
+                butActDone = false;
+            } else if ( !butActDone ) {
+                butActDone = true;
+
+                d = goUp ? d+10 : d-10;
+                goUp = (d == 100) ? false :
+                       (d == 0)   ? true  :
+                                    goUp;
+                pwm.setD (d);
+
+                if ( pwm.isOutEnable() ) {
+                    pwm.outDisable();
+                } else {
+                    pwm.outEnable();
+                }
             }
         }
-
 
     } // while (1)
 }

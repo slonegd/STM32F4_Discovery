@@ -23,3 +23,5 @@ using Button = PA0;
 
 using PWMout = Rled;
 using PWMtimer = TIM4_t;
+
+uint32_t fCPU = 168000000;
