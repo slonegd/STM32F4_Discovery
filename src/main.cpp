@@ -29,11 +29,10 @@ int main(void)
         eeprom.data.d2 = 3;
     }
 
-
     // инициализация таймера с шим
     // прескаллер спецом, чтбы было видно на индикаторе высокие частоты
-    PWMtimer::SetPrescaller (10000);
-    pwm.setFreq (10000);
+    PWMtimer::SetPrescaller (1000);
+    pwm.setFreq (20000);
     pwm.setD (50);
     pwm.outEnable();
 
@@ -42,8 +41,8 @@ int main(void)
     butTimer.setTimeAndStart (200);
    
 
-	while (1)
-	{
+    while (1)
+    {
         timers.update();
 
         if ( ledTimer.event() ) {
@@ -51,15 +50,13 @@ int main(void)
         }
 
         if ( butTimer.event() ) {
-            bool butActDone = false;
-            static bool goUp = true;
-            static uint8_t d = 50;
-
+            static bool butActDone = false;
             if ( !Button::IsSet() ) {
                 butActDone = false;
             } else if ( !butActDone ) {
                 butActDone = true;
-
+                static bool goUp = true;
+                static uint8_t d = 50;
                 d = goUp ? d+10 : d-10;
                 goUp = (d == 100) ? false :
                        (d == 0)   ? true  :
@@ -78,11 +75,9 @@ int main(void)
 }
 
 
-/*****************************************************************************
-*
-*       ПРЕРЫВАНИЯ
-*
-*****************************************************************************/
+//////////////////////////////////////////////////////////////////////////////
+//       ПРЕРЫВАНИЯ
+//////////////////////////////////////////////////////////////////////////////
 extern "C" void SysTick_Handler (void)
 {
     timers.tick();

@@ -14,98 +14,93 @@
  */
   
 #pragma once
- 
+
 #include <stdbool.h>
 #include <string.h>
 #include "defines.h"
 
-template <uint8_t sector> constexpr uint32_t Addres();
-template <uint8_t sector> constexpr uint32_t Size();
+template <uint8_t sector> static constexpr uint32_t Addres();
+template <uint8_t sector> static constexpr uint32_t Size();
 
 
 template <class DATA, uint8_t sector>
 class EEPROM 
 {
 public:
-    DATA data;
-    bool readFromFlash ();
-    void update();
+   DATA data;
+   bool readFromFlash ();
+   void update();
 
 private:
-    static constexpr uint32_t QtyBytes = sizeof(DATA);
-    uint8_t buf[QtyBytes];
-    uint16_t flashOffset;
-    struct ByteInd_t {
-        uint8_t byte;
-        uint8_t ind;   
-    };
-    struct Flash_t {
-        ByteInd_t data[Size<sector>()/2];
-    };
-    
-    volatile Flash_t& flash = *( (Flash_t *) Addres<sector>() );
-    
+   static constexpr uint32_t QtyBytes = sizeof(DATA);
+   uint8_t buf[QtyBytes];
+   uint16_t flashOffset;
+   struct ByteInd_t {
+       uint8_t byte;
+       uint8_t ind;   
+   };
+   struct Flash_t {
+       ByteInd_t data[Size<sector>()/2];
+   };
+   volatile Flash_t& flash = *( (Flash_t *) Addres<sector>() );
 };
 
 
 template <class Data, uint8_t sector>
 bool EEPROM<Data,sector>::readFromFlash ()
 {
-    // обнуляем буфер перед заполнением
-    memset (buf, 0, QtyBytes);
+   // обнуляем буфер перед заполнением
+   memset (buf, 0, QtyBytes);
 
-    // подумать на случай если данных стало меньше (при перепрошики)
-    // надо читать все данные, но в maxInd только те которые меньше количества байт
-    // чтоб не вылезть за границы массива
-    uint16_t maxInd = 0;
-    for (uint16_t i = 0; i < Size<sector>(); i++) {
-        uint16_t index;
-        index = flash.data[i].ind;
-        if ( index < QtyBytes) {
-            buf[index] = flash.data[i].byte;
-            maxInd = (maxInd > index) ? maxInd : index;
-        } else {
-            flashOffset = i;
-        }
+   // подумать на случай если данных стало меньше (при перепрошики)
+   // надо читать все данные, но в maxInd только те которые меньше количества байт
+   // чтоб не вылезть за границы массива
+   uint16_t maxInd = 0;
+   for (uint16_t i = 0; i < Size<sector>(); i++) {
+       uint16_t index;
+       index = flash.data[i].ind;
+       if ( index < QtyBytes) {
+           buf[index] = flash.data[i].byte;
+           maxInd = (maxInd > index) ? maxInd : index;
+       } else {
+           flashOffset = i;
+       }
 
-    }
+   }
 /*	if (FLASH_PAGE->Page[0] == 0xFFFFFFFF) {
-		//еще ничего не записано
-		return (false);
-	} else {
-		// просматриваем весь флеш
-		uint16_t MaxWordN = 0;
-		for (uint16_t i = 0; i < 256; i++) {
-
-
-			uint16_t WordN;
-			WordN = FLASH_PAGE->NumData[i].num;
-			if (WordN < QtyWords) {
-				EEPROMbuf[WordN] = FLASH_PAGE->NumData[i].data;
-				MaxWordN = (MaxWordN < WordN) ? WordN : MaxWordN;
-			} else {
-				FLASHOffset = i;
-				if ( MaxWordN != (QtyWords - 1) ) {
-					return (false);	//не все данные записаны
-				}
-				break;
-			}
-		}
-		/**
-		 * копируем данные в структуру
-
-		uint16_t* ar = (uint16_t*)st;
-		for (uint16_t i = 0; i < QtyWords; i++) {
-			ar[i] = EEPROMbuf[i];
-		}
-		return (true);
-    }*/
-    return false;
+       //еще ничего не записано
+       return (false);
+   } else {
+       // просматриваем весь флеш
+       uint16_t MaxWordN = 0;
+       for (uint16_t i = 0; i < 256; i++) {
+           uint16_t WordN;
+           WordN = FLASH_PAGE->NumData[i].num;
+           if (WordN < QtyWords) {
+               EEPROMbuf[WordN] = FLASH_PAGE->NumData[i].data;
+               MaxWordN = (MaxWordN < WordN) ? WordN : MaxWordN;
+           } else {
+               FLASHOffset = i;
+               if ( MaxWordN != (QtyWords - 1) ) {
+                   return (false);	//не все данные записаны
+               }
+               break;
+           }
+       }
+       /**
+        * копируем данные в структуру
+       uint16_t* ar = (uint16_t*)st;
+       for (uint16_t i = 0; i < QtyWords; i++) {
+           ar[i] = EEPROMbuf[i];
+       }
+       return (true);
+   }*/
+   return false;
 }
 template <class Data, uint8_t sector>
 void EEPROM<Data,sector>::update ()
 {
-    
+   
 }
 
 
@@ -142,38 +137,6 @@ template<> constexpr uint32_t Size<10>()   { return 128*1024;   }
 
 template<> constexpr uint32_t Addres<11>() { return 0x080E0000; }
 template<> constexpr uint32_t Size<11>()   { return 128*1024;   }
- 
 
-/*
-    typedef struct {
-        uint16_t data;
-        uint16_t num;
-    } NumData_t;
-    typedef union {
-        volatile uint32_t Page[255];
-        volatile NumData_t NumData[255];
-    } FLASH_Page_EEPROM_t;
-
-    static volatile FLASH_Page_EEPROM_t* FLASH_PAGE = ((FLASH_Page_EEPROM_t*)0x08007C00);
-
-    // количество данных в 16 битном формате 
-    #define QTY_WORD_IN_EEPROM_BUF		(sizeof(struct EEPROMst) / 2)
-    
-
-    // буфер для определения измененных данных
-    // содержит записанные в еепром данные
-    // обновляется при записи измененных данных
-    // используется в функциях EEPROMRead() и EEPROMUpd()
-    static volatile uint16_t EEPROMbuf[QTY_WORD_IN_EEPROM_BUF];
-
-
-    // читает структуру из еепром (используется только при инициализации)
-    // возвращает false если в памяти пусто, или не все данные записаны
-
-    bool EEPROMRead(volatile struct EEPROMst* st);
-
-    //следит за обнавлением в памяти данных, если они изменились
-    void EEPROMUpd(volatile struct EEPROMst* st);
-*/
 
 
