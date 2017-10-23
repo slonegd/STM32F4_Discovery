@@ -69,8 +69,8 @@ PERIFLIB_SOURCES =
 #######################################
 # binaries
 #######################################
-#PREFIX = arm-none-eabi-
-PREFIX = /home/slonegd/Code/gcc-arm-none-eabi-6-2017-q2-update/bin/arm-none-eabi-
+PREFIX = arm-none-eabi-
+#PREFIX = /home/slonegd/Code/gcc-arm-none-eabi-6-2017-q2-update/bin/arm-none-eabi-
 #PREFIX = /home/dvk/code/gcc-arm-none-eabi-6-2017-q1-update/bin/arm-none-eabi-
 CPP = $(PREFIX)g++
 CC = $(PREFIX)gcc
@@ -162,7 +162,7 @@ $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
 	$(CC) -c $(CFLAGS) -std=c99 -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.cpp Makefile | $(BUILD_DIR) 
-	$(CPP) -c $(CFLAGS) -std=c++14 -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.cpp=.lst)) $< -o $@
+	$(CPP) -c $(CFLAGS) -std=c++11 -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.cpp=.lst)) $< -o $@
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@

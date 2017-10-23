@@ -2,18 +2,15 @@
 
 uint16_t i = 0;
 
-Timers<2> timers;
+const uint8_t timersQty = 2;
+Timers<timersQty> timers;
 auto& ledTimer = timers.all[0];
 auto& butTimer = timers.all[1];
 
+const uint8_t flashSector = 2;
+Flash<FlashData, flashSector> flash;
+
 PWM<PWMtimer, PWMout> pwm;
-
-struct EEPROMdata {
-    uint16_t d1;
-    uint16_t d2;
-};
-
-EEPROM<EEPROMdata, 2> eeprom;
 
 int main(void)
 {
@@ -24,9 +21,9 @@ int main(void)
     PortsInit ();
 
     // eeprom
-    if ( !eeprom.readFromFlash() ) {
-        eeprom.data.d1 = 1;
-        eeprom.data.d2 = 3;
+    if ( !flash.readFromFlash() ) {
+        flash.data.d1 = 1;
+        flash.data.d2 = 3;
     }
 
     // инициализация таймера с шим
@@ -40,7 +37,6 @@ int main(void)
     ledTimer.setTimeAndStart (500);
     butTimer.setTimeAndStart (200);
    
-
     while (1)
     {
         timers.update();
@@ -50,11 +46,13 @@ int main(void)
         }
 
         if ( butTimer.event() ) {
+            flash.update();
             static bool butActDone = false;
             if ( !Button::IsSet() ) {
                 butActDone = false;
             } else if ( !butActDone ) {
                 butActDone = true;
+
                 static bool goUp = true;
                 static uint8_t d = 50;
                 d = goUp ? d+10 : d-10;
@@ -68,6 +66,8 @@ int main(void)
                 } else {
                     pwm.outEnable();
                 }
+
+                flash.data.d2++;
             }
         }
 

@@ -5,205 +5,207 @@
 #include "stm32f4xx.h"
 #include "GPIO_ral.h"
 
-struct CR1_t {
-    struct Bits_t {
-        // Bit 0 CEN: Counter enable
-        volatile bool CEN        :1;
-        // Bit 1 UDIS: Update disable
-        volatile uint32_t UDIS   :1;
-        // Bit 2 URS: Update request source
-        volatile uint32_t URS    :1;
-        // Bit 3 OPM: One-pulse mode
-        volatile uint32_t OPM    :1;
-        // Bit 4 DIR: Direction
-        // 0: Counter used as upcounter
-        // 1: Counter used as downcounter
-        volatile uint32_t DIR    :1;
-        // Bits 6:5 CMS: Center-aligned mode selection
-        volatile uint32_t CMS    :2;
-        // Bit 7 ARPE: Auto-reload preload enable
-        volatile bool ARPE       :1;
-        // Bits 9:8 CKD: Clock division
-        // 00: t DTS = t CK_INT
-        // 01: t DTS = 2 × t CK_INT
-        // 10: t DTS = 4 × t CK_INT
-        volatile uint32_t CKD    :2;
-        // Bits 15:10 Reserved, must be kept at reset value.
-        volatile uint32_t dcb    :22;
-    };
-    volatile Bits_t bits;
-};
+namespace TIM_ral {
 
-struct CR2_t {
-    struct Bits_t {
-        // Bits 2:0 Reserved, must be kept at reset value.
-        volatile uint32_t dcb1  :3;
-        // Bit 3 CCDS: Capture/compare DMA selection
-        volatile uint32_t CCDS  :1;
-        // Bits 6:4 MMS[2:0]: Master mode selection
-        volatile uint32_t MMS   :3;
-        // Bit 7 TI1S: TI1 selection
-        volatile uint32_t TI1S  :1;
-        // Bits 15:8 Reserved, must be kept at reset value.
-        volatile uint32_t dcb2  :24;
-    };
-    volatile Bits_t bits;
-};
-
-struct SMCR_t {
-    uint32_t reg;
-};
-
-struct DIER_t {
-    struct Bits_t {
-        // Bit 0 UIE: Update interrupt enable
-        volatile uint32_t UIE   :1;
-        // Bit 1 CC1IE: Capture/Compare 1 interrupt enable
-        volatile uint32_t CC1IE :1;
-        // Bit 2 CC2IE: Capture/Compare 2 interrupt enable
-        volatile uint32_t CC2IE :1;
-        // Bit 3 CC2IE: Capture/Compare 3 interrupt enable
-        volatile uint32_t CC3IE :1;
-        // Bit 4 CC2IE: Capture/Compare 4 interrupt enable
-        volatile uint32_t CC4IE :1;
-        // Bit 5 Reserved, must be kept at reset value.
-        volatile uint32_t dcb1  :1;
-        // Bit 6 TIE: Trigger interrupt enable
-        volatile uint32_t TIE   :1;
-        // Bit 7 Reserved, must be kept at reset value.
-        volatile uint32_t dcb2  :1;
-        // Bit 8 UDE: Update DMA request enable
-        volatile uint32_t UDE   :1;
-        // Bit 9 CC1DE: Capture/Compare 1 DMA request enable
-        volatile uint32_t CC1DE :1;
-        // Bit 10 CC1DE: Capture/Compare 2 DMA request enable
-        volatile uint32_t CC2DE :1;
-        // Bit 11 CC1DE: Capture/Compare 3 DMA request enable
-        volatile uint32_t CC3DE :1;
-        // Bit 12 CC1DE: Capture/Compare 4 DMA request enable
-        volatile uint32_t CC4DE :1;
-        // Bit 13 Reserved, always read as 0.
-        volatile uint32_t dcb3  :1;
-        // Bit 14 TDE: Trigger DMA request enable
-        volatile uint32_t TDE   :1;
-        // Bit 15 Reserved, must be kept at reset value.
-        volatile uint32_t dcb4  :17;
-    };
-    volatile Bits_t bits;
-};
-
-
-
-struct SR_t {
-    uint32_t reg;
-};
-
-struct EGR_t {
-    uint32_t reg;
-};
-
-struct CCMR_t {
-
-    enum CompareMode {
-        Off             = 0b000,
-        ActiveOnMatch   = 0b001,
-        InactiveOnMatch = 0b010,
-        ToggleOnMatch   = 0b011,
-        ForceInactive   = 0b100,
-        ForceActive     = 0b101,
-        PWMmode         = 0b110,
-        InvertedPWMmode = 0b111
-    };
-
-    struct Bits_t {
-        // Bits 1:0 CC1S: Capture/Compare 1 selection
-        volatile uint32_t CC1S      :2;
-        // Bit 2 OC1FE: Output compare 1 fast enable
-        volatile bool OC1FE         :1;
-        // Bit 3 OC1PE: Output compare 1 preload enable
-        volatile bool OC1PE         :1;
-        // Bits 6:4 OC1M: Output compare 1 mode
-        volatile CompareMode OC1M   :3;
-        // Bit 7 OC1CE: Output compare 1 clear enable
-        volatile bool OC1CE         :1;
-
-        volatile uint32_t CC2S      :2;
-        volatile bool OC2FE         :1;
-        volatile bool OC2PE         :1;
-        volatile CompareMode OC2M   :3;
-        volatile bool OC2CE         :1;
-
-        uint32_t dcb1               :16;
-
-        volatile uint32_t CC3S      :2;
-        volatile bool OC3FE         :1;
-        volatile bool OC3PE         :1;
-        volatile CompareMode OC3M   :3;
-        volatile bool OC3CE         :1;
-        volatile uint32_t CC4S      :2;
-        volatile bool OC4FE         :1;
-        volatile bool OC4PE         :1;
-        volatile CompareMode OC4M   :3;
-        volatile bool OC4CE         :1;
-
-        uint32_t dcb2               :16;
-    };
-    union {
+    struct CR1_t {
+        struct Bits_t {
+            // Bit 0 CEN: Counter enable
+            volatile bool CEN        :1;
+            // Bit 1 UDIS: Update disable
+            volatile uint32_t UDIS   :1;
+            // Bit 2 URS: Update request source
+            volatile uint32_t URS    :1;
+            // Bit 3 OPM: One-pulse mode
+            volatile uint32_t OPM    :1;
+            // Bit 4 DIR: Direction
+            // 0: Counter used as upcounter
+            // 1: Counter used as downcounter
+            volatile uint32_t DIR    :1;
+            // Bits 6:5 CMS: Center-aligned mode selection
+            volatile uint32_t CMS    :2;
+            // Bit 7 ARPE: Auto-reload preload enable
+            volatile bool ARPE       :1;
+            // Bits 9:8 CKD: Clock division
+            // 00: t DTS = t CK_INT
+            // 01: t DTS = 2 × t CK_INT
+            // 10: t DTS = 4 × t CK_INT
+            volatile uint32_t CKD    :2;
+            // Bits 15:10 Reserved, must be kept at reset value.
+            volatile uint32_t dcb    :22;
+        };
         volatile Bits_t bits;
-        volatile uint32_t regs[2];   
     };
-};
-struct CCER_t {
-    struct Bits {
-        // Bit 0 CC1E: Capture/Compare 1 output enable.
-        volatile bool CC1E      :1;
-        // Bit 1 CC1P: Capture/Compare 1 output Polarity.
-        volatile uint32_t CC1P  :1;
-        // Bit 2 Reserved, must be kept at reset value.
-        volatile uint32_t dcb1  :1;
-        // Bit 3 CC1NP: Capture/Compare 1 output Polarity.
-        volatile uint32_t CC1NP :1;
 
-        volatile bool CC2E      :1;
-        volatile uint32_t CC2P  :1;
-        volatile uint32_t dcb2  :1;
-        volatile uint32_t CC2NP :1;
-        volatile bool CC3E      :1;
-        volatile uint32_t CC3P  :1;
-        volatile uint32_t dcb3  :1;
-        volatile uint32_t CC3NP :1;
-        volatile bool CC4E      :1;
-        volatile uint32_t CC4P  :1;
-        volatile uint32_t dcb4  :1;
-        volatile uint32_t CC4NP :1;
-        volatile uint32_t dcb5  :16;
+    struct CR2_t {
+        struct Bits_t {
+            // Bits 2:0 Reserved, must be kept at reset value.
+            volatile uint32_t dcb1  :3;
+            // Bit 3 CCDS: Capture/compare DMA selection
+            volatile uint32_t CCDS  :1;
+            // Bits 6:4 MMS[2:0]: Master mode selection
+            volatile uint32_t MMS   :3;
+            // Bit 7 TI1S: TI1 selection
+            volatile uint32_t TI1S  :1;
+            // Bits 15:8 Reserved, must be kept at reset value.
+            volatile uint32_t dcb2  :24;
+        };
+        volatile Bits_t bits;
     };
-    union {
-        Bits bits;
-        uint16_t reg;
+
+    struct SMCR_t {
+        uint32_t reg;
     };
-};
 
-struct CNT_t {
-    uint32_t reg;
-};
+    struct DIER_t {
+        struct Bits_t {
+            // Bit 0 UIE: Update interrupt enable
+            volatile uint32_t UIE   :1;
+            // Bit 1 CC1IE: Capture/Compare 1 interrupt enable
+            volatile uint32_t CC1IE :1;
+            // Bit 2 CC2IE: Capture/Compare 2 interrupt enable
+            volatile uint32_t CC2IE :1;
+            // Bit 3 CC2IE: Capture/Compare 3 interrupt enable
+            volatile uint32_t CC3IE :1;
+            // Bit 4 CC2IE: Capture/Compare 4 interrupt enable
+            volatile uint32_t CC4IE :1;
+            // Bit 5 Reserved, must be kept at reset value.
+            volatile uint32_t dcb1  :1;
+            // Bit 6 TIE: Trigger interrupt enable
+            volatile uint32_t TIE   :1;
+            // Bit 7 Reserved, must be kept at reset value.
+            volatile uint32_t dcb2  :1;
+            // Bit 8 UDE: Update DMA request enable
+            volatile uint32_t UDE   :1;
+            // Bit 9 CC1DE: Capture/Compare 1 DMA request enable
+            volatile uint32_t CC1DE :1;
+            // Bit 10 CC1DE: Capture/Compare 2 DMA request enable
+            volatile uint32_t CC2DE :1;
+            // Bit 11 CC1DE: Capture/Compare 3 DMA request enable
+            volatile uint32_t CC3DE :1;
+            // Bit 12 CC1DE: Capture/Compare 4 DMA request enable
+            volatile uint32_t CC4DE :1;
+            // Bit 13 Reserved, always read as 0.
+            volatile uint32_t dcb3  :1;
+            // Bit 14 TDE: Trigger DMA request enable
+            volatile uint32_t TDE   :1;
+            // Bit 15 Reserved, must be kept at reset value.
+            volatile uint32_t dcb4  :17;
+        };
+        volatile Bits_t bits;
+    };
 
-struct PSC_t {
-    uint32_t reg;
-};
 
-struct ARR_t {
-    uint32_t reg;
-};
 
-struct RCR_t {
-    uint32_t reg;
-};
+    struct SR_t {
+        uint32_t reg;
+    };
 
-struct CCR_t {
-    uint32_t regs[4];
-};
+    struct EGR_t {
+        uint32_t reg;
+    };
 
+    struct CCMR_t {
+
+        enum CompareMode {
+            Off             = 0b000,
+            ActiveOnMatch   = 0b001,
+            InactiveOnMatch = 0b010,
+            ToggleOnMatch   = 0b011,
+            ForceInactive   = 0b100,
+            ForceActive     = 0b101,
+            PWMmode         = 0b110,
+            InvertedPWMmode = 0b111
+        };
+
+        struct Bits_t {
+            // Bits 1:0 CC1S: Capture/Compare 1 selection
+            volatile uint32_t CC1S      :2;
+            // Bit 2 OC1FE: Output compare 1 fast enable
+            volatile bool OC1FE         :1;
+            // Bit 3 OC1PE: Output compare 1 preload enable
+            volatile bool OC1PE         :1;
+            // Bits 6:4 OC1M: Output compare 1 mode
+            volatile CompareMode OC1M   :3;
+            // Bit 7 OC1CE: Output compare 1 clear enable
+            volatile bool OC1CE         :1;
+
+            volatile uint32_t CC2S      :2;
+            volatile bool OC2FE         :1;
+            volatile bool OC2PE         :1;
+            volatile CompareMode OC2M   :3;
+            volatile bool OC2CE         :1;
+
+            uint32_t dcb1               :16;
+
+            volatile uint32_t CC3S      :2;
+            volatile bool OC3FE         :1;
+            volatile bool OC3PE         :1;
+            volatile CompareMode OC3M   :3;
+            volatile bool OC3CE         :1;
+            volatile uint32_t CC4S      :2;
+            volatile bool OC4FE         :1;
+            volatile bool OC4PE         :1;
+            volatile CompareMode OC4M   :3;
+            volatile bool OC4CE         :1;
+
+            uint32_t dcb2               :16;
+        };
+        union {
+            volatile Bits_t bits;
+            volatile uint32_t regs[2];   
+        };
+    };
+    struct CCER_t {
+        struct Bits {
+            // Bit 0 CC1E: Capture/Compare 1 output enable.
+            volatile bool CC1E      :1;
+            // Bit 1 CC1P: Capture/Compare 1 output Polarity.
+            volatile uint32_t CC1P  :1;
+            // Bit 2 Reserved, must be kept at reset value.
+            volatile uint32_t dcb1  :1;
+            // Bit 3 CC1NP: Capture/Compare 1 output Polarity.
+            volatile uint32_t CC1NP :1;
+
+            volatile bool CC2E      :1;
+            volatile uint32_t CC2P  :1;
+            volatile uint32_t dcb2  :1;
+            volatile uint32_t CC2NP :1;
+            volatile bool CC3E      :1;
+            volatile uint32_t CC3P  :1;
+            volatile uint32_t dcb3  :1;
+            volatile uint32_t CC3NP :1;
+            volatile bool CC4E      :1;
+            volatile uint32_t CC4P  :1;
+            volatile uint32_t dcb4  :1;
+            volatile uint32_t CC4NP :1;
+            volatile uint32_t dcb5  :16;
+        };
+        union {
+            Bits bits;
+            uint16_t reg;
+        };
+    };
+
+    struct CNT_t {
+        uint32_t reg;
+    };
+
+    struct PSC_t {
+        uint32_t reg;
+    };
+
+    struct ARR_t {
+        uint32_t reg;
+    };
+
+    struct RCR_t {
+        uint32_t reg;
+    };
+
+    struct CCR_t {
+        uint32_t regs[4];
+    };
+}
 
 /*
 typedef struct
@@ -232,11 +234,13 @@ typedef struct
 } TIM_TypeDef;
 */
 
+using namespace TIM_ral;
+
 struct TIM_t : public CR1_t,
                public CR2_t,
                public SMCR_t,
                public DIER_t,
-               public SR_t,
+               public TIM_ral::SR_t,
                public EGR_t,
                public CCMR_t,
                public CCER_t,

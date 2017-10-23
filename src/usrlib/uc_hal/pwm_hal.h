@@ -18,6 +18,8 @@
 
 
 
+
+
 template <class Timer, class Pin>
 class PWM
 {
@@ -28,9 +30,8 @@ private:
     uint16_t d;
     // таймер считает до, зависит от частоты
     uint32_t countTo;
-    // для кокретизации пары таймер-пин
-    void concretize (void);
-    // номер канала, завивист от парты таймер-пин, инициализируеться в макросе CONCRETIZE
+    // номер канала, завивист от парты таймер-пин
+    // инициализируеться для каждой парты тамер-пин
     static const uint8_t channel;
 
     void init (void)
@@ -57,7 +58,7 @@ public:
     inline bool isOutEnable ()    { return Timer::template IsCompareEnable<channel>(); }
     inline void setFreq (uint32_t f)
     {
-        extern uint32_t fCPU;
+        extern const uint32_t fCPU;
         if ( (f != this->freq) && (f != 0) ) {
             this->freq = f;
             countTo = fCPU / f - 1;
@@ -74,14 +75,10 @@ public:
 };
 
 
-#define CONCRETIZE(Timer, Pin, Channel) template<> \
-    inline void PWM<Timer, Pin>::concretize() { } \
-    template<> \
-    const uint8_t PWM<Timer, Pin>::channel = Channel
-
 ////////////////////////////////////////////////////
 // конкретизация 
 ////////////////////////////////////////////////////
+
 
 template<> const uint8_t PWM<TIM2_t,PA0>::channel  = 1;
 template<> const uint8_t PWM<TIM2_t,PA1>::channel  = 2;
@@ -112,3 +109,6 @@ template<> const uint8_t PWM<TIM4_t,PD12>::channel = 1;
 template<> const uint8_t PWM<TIM4_t,PD13>::channel = 2;
 template<> const uint8_t PWM<TIM4_t,PD14>::channel = 3;
 template<> const uint8_t PWM<TIM4_t,PD15>::channel = 4;
+
+
+

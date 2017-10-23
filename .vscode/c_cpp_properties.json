@@ -39,13 +39,7 @@
                 "${workspaceRoot}/src/usrlib",
                 "${workspaceRoot}/src/usrlib/uc_hal",
                 "${workspaceRoot}/mcu_files",
-                "${workspaceRoot}/mcu_files",
-                "${workspaceRoot}/mcu_files",
-                "${workspaceRoot}/mcu_files",
-                "${workspaceRoot}/mcu_files",
-                "${workspaceRoot}/mcu_files",
-                "${workspaceRoot}/mcu_files",
-                "${workspaceRoot}/mcu_files"
+                "${workspaceRoot}/src"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",

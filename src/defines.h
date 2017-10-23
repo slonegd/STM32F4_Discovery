@@ -2,7 +2,7 @@
 
 #include "pin_hal.h"
 #include "pinlist.h"
-#include "eeprom.h"
+#include "flash_hal.h"
 #include "TIM_ral.h"
 #include "pwm_hal.h"
 #include "RCC_ral.h"
@@ -25,4 +25,9 @@ using Button = PA0;
 using PWMout = Rled;
 using PWMtimer = TIM4_t;
 
-uint32_t fCPU = 168000000;
+const uint32_t fCPU = 168000000;
+
+struct FlashData {
+    uint16_t d1;
+    uint16_t d2;
+};
