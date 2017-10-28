@@ -1,4 +1,5 @@
 #include "init.h"
+#include "USART_hal.h"
 
 uint16_t i = 0;
 
@@ -12,9 +13,17 @@ Flash<FlashData, flashSector> flash;
 
 PWM<PWMtimer, PWMout> pwm;
 
+const uint8_t bufSize = 30;
+using USART_ = USART<USART1_t,bufSize>;
+USART_ uart;
+// using USART_ = USART<USART1_t,bufSize>;
+// USART_::Settings set {USART_::Boudrate::BR9600, false};
+// auto uart = USART_ (set);
+
 int main(void)
 {
     makeDebugVar();
+    USART1_t::SetBoudRate<USART1_t::Boudrate::BR9600, fCPU>();
    
     // инициализация системных частот
     CLKinit ();
@@ -25,6 +34,15 @@ int main(void)
         flash.data.d1 = 1;
         flash.data.d2 = 3;
     }
+
+    // модбас
+    USART_::Settings set = {
+        USART_::Boudrate::BR9600,
+        USART_::ParityEn::disable,
+        USART_::Parity::even,
+        USART_::StopBits::_1
+    };
+    uart.init (set);
 
     // инициализация таймера с шим
     // прескаллер спецом, чтбы было видно на индикаторе высокие частоты
