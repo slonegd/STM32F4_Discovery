@@ -50,4 +50,6 @@ v0.220  имитация еепром закончил, flash_hal.h
 
 v0.221  USART_ral USART_hal DMA_ral в процессе
 
+v0.222  начал modbusSlave.h
+
 

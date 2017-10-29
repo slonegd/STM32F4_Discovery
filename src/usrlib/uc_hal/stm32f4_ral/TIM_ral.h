@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "stm32f4xx.h"
 #include "GPIO_ral.h"
+#include "RCC_ral.h"
 
 namespace TIM_ral {
 
@@ -299,9 +300,9 @@ public:
     
 };
 
-using TIM1_t = TIM<TIM1_BASE, 0x44, RCC_APB2ENR_TIM1EN_Msk, AFR_t::AF::AF1>;
-using TIM2_t = TIM<TIM2_BASE, 0x40, RCC_APB1ENR_TIM2EN_Msk, AFR_t::AF::AF1>;
-using TIM3_t = TIM<TIM3_BASE, 0x40, RCC_APB1ENR_TIM3EN_Msk, AFR_t::AF::AF2>;
-using TIM4_t = TIM<TIM4_BASE, 0x40, RCC_APB1ENR_TIM4EN_Msk, AFR_t::AF::AF2>;
+using TIM1_t = TIM<TIM1_BASE, RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_TIM1EN_Msk, AFR_t::AF::AF1>;
+using TIM2_t = TIM<TIM2_BASE, RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_TIM2EN_Msk, AFR_t::AF::AF1>;
+using TIM3_t = TIM<TIM3_BASE, RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_TIM3EN_Msk, AFR_t::AF::AF2>;
+using TIM4_t = TIM<TIM4_BASE, RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_TIM4EN_Msk, AFR_t::AF::AF2>;
 
 

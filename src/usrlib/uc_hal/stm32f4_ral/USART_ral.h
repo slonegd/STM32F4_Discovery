@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "stm32f4xx.h"
 #include "DMA_ral.h"
+#include "RCC_ral.h"
 
 namespace USART_ral {
 
@@ -76,6 +77,8 @@ namespace USART_ral {
             volatile bool SBK           :1;
             // Bit 1 RWU: Receiver wakeup
             volatile bool RWU           :1;
+            // Bit 2 RE: Receiver enable
+            volatile bool RE            :1;
             // Bit 3 TE: Transmitter enable
             volatile bool TE            :1;
             // Bit 4 IDLEIE: IDLE interrupt enable
@@ -213,8 +216,6 @@ typedef struct
 } USART_TypeDef;
 */
 
-using namespace USART_ral;
-
 struct USART_t : public USART_ral::SR_t,
                  public USART_ral::DR_t,
                  public USART_ral::BRR_t,
@@ -226,8 +227,10 @@ struct USART_t : public USART_ral::SR_t,
 
 };
 
+extern const uint32_t fCPU;
+
 // ClkEnOffset оффсет для регистра из структуры RCC, разрешающий тактирование 
-template <uint32_t USARTptr, class DMAstreamRX, class DMAstreamTX>
+template <uint32_t USARTptr, class DMAstreamRX, class DMAstreamTX, uint32_t ClkEnOffset, uint32_t ClkEnMask>
 class USARTx : USART_t
 {
 public:
@@ -255,15 +258,23 @@ protected:
     static volatile USART_ral::CR3_t  &c3()  { return (USART_ral::CR3_t &)  (*(USART_TypeDef*)USARTptr).CR3;  }
     static volatile USART_ral::GTPR_t &gtp() { return (USART_ral::GTPR_t &) (*(USART_TypeDef*)USARTptr).GTPR; }
 public:
-    template<Boudrate brval, uint32_t fCPU>
-    static void SetBoudRate ()
-    { 
-        constexpr uint32_t val = fCPU / brval;
-        br().reg = val;
-    }
+    static inline void ClockEnable()                { *((uint32_t*)(RCC_BASE + ClkEnOffset)) |= ClkEnMask; }
+    static inline void Enable()                     { c1().bits.UE = true; }
+    static inline void Disable()                    { c1().bits.UE = false; }
+    static inline void RXenable()                   { c1().bits.RE = true; }
+    static inline void RXdisable()                  { c1().bits.RE = false; }
+    static inline void TXenable()                   { c1().bits.TE = true; }
+    static inline void TXdisable()                  { c1().bits.TE = false; }
+    static inline void DMAtxEnable()                { c3().bits.DMAT = true; }
+    static inline void DMArxEnable()                { c3().bits.DMAR = true; }
+    static inline void SetBoudRate (Boudrate brval) { br().reg = fCPU / brval; }
+    static inline void ParityEnable ()              { c1().bits.PCE = true; }
+    static inline void ParityDisable ()             { c1().bits.PCE = false; }
+    static inline void SetParity (Parity p)         { c1().bits.PS = p; }
+    static inline void SetStopBits (StopBits sb)    { c2().bits.STOP = sb; }
 };
 
-using USART1_t = USARTx<USART1_BASE, DMA2stream5, DMA2stream7>;
-using USART2_t = USARTx<USART2_BASE, DMA1stream5, DMA1stream6>;
-using USART3_t = USARTx<USART3_BASE, DMA1stream1, DMA1stream3>;
-using USART6_t = USARTx<USART6_BASE, DMA2stream1, DMA2stream2>;
+using USART1_t = USARTx<USART1_BASE, DMA2stream5, DMA2stream7, RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART1EN_Msk>;
+using USART2_t = USARTx<USART2_BASE, DMA1stream5, DMA1stream6, RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_USART2EN_Msk>;
+using USART3_t = USARTx<USART3_BASE, DMA1stream1, DMA1stream3, RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_USART3EN_Msk>;
+using USART6_t = USARTx<USART6_BASE, DMA2stream1, DMA2stream2, RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART6EN_Msk>;

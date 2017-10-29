@@ -20,7 +20,7 @@
 #include "FLASH_ral.h"
 
 template <uint8_t sector> static constexpr uint32_t Addres();
-template <uint8_t sector> static constexpr uint32_t Size() { return 0; }
+template <uint8_t sector> static constexpr int32_t Size();
 
 
 template <class DATA, uint8_t sector>
@@ -194,37 +194,37 @@ void Flash<Data,sector>::update ()
 
 
 template<> constexpr uint32_t Addres<1>()  { return 0x08004000; }
-template<> constexpr uint32_t Size<1>()    { return 16*1024;    }
+template<> constexpr int32_t Size<1>()     { return 16*1024;    }
 
 template<> constexpr uint32_t Addres<2>()  { return 0x08008000; }
-template<> constexpr uint32_t Size<2>()    { return 16*1024;    }
+template<> constexpr int32_t Size<2>()     { return 16*1024;    }
 
 template<> constexpr uint32_t Addres<3>()  { return 0x0800C000; }
-template<> constexpr uint32_t Size<3>()    { return 16*1024;    }
+template<> constexpr int32_t Size<3>()     { return 16*1024;    }
 
 template<> constexpr uint32_t Addres<4>()  { return 0x08010000; }
-template<> constexpr uint32_t Size<4>()    { return 64*1024;    }
+template<> constexpr int32_t Size<4>()     { return 64*1024;    }
 
 template<> constexpr uint32_t Addres<5>()  { return 0x08020000; }
-template<> constexpr uint32_t Size<5>()    { return 128*1024;   }
+template<> constexpr int32_t Size<5>()     { return 128*1024;   }
 
 template<> constexpr uint32_t Addres<6>()  { return 0x08040000; }
-template<> constexpr uint32_t Size<6>()    { return 128*1024;   }
+template<> constexpr int32_t Size<6>()     { return 128*1024;   }
 
 template<> constexpr uint32_t Addres<7>()  { return 0x08060000; }
-template<> constexpr uint32_t Size<7>()    { return 128*1024;   }
+template<> constexpr int32_t Size<7>()     { return 128*1024;   }
 
 template<> constexpr uint32_t Addres<8>()  { return 0x08080000; }
-template<> constexpr uint32_t Size<8>()    { return 128*1024;   }
+template<> constexpr int32_t Size<8>()     { return 128*1024;   }
 
 template<> constexpr uint32_t Addres<9>()  { return 0x080A0000; }
-template<> constexpr uint32_t Size<9>()    { return 128*1024;   }
+template<> constexpr int32_t Size<9>()     { return 128*1024;   }
 
 template<> constexpr uint32_t Addres<10>() { return 0x080C0000; }
-template<> constexpr uint32_t Size<10>()   { return 128*1024;   }
+template<> constexpr int32_t Size<10>()    { return 128*1024;   }
 
 template<> constexpr uint32_t Addres<11>() { return 0x080E0000; }
-template<> constexpr uint32_t Size<11>()   { return 128*1024;   }
+template<> constexpr int32_t Size<11>()    { return 128*1024;   }
 
 
 
