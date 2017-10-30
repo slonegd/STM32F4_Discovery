@@ -54,7 +54,7 @@ public:
         USART_::Enable();
 
         DMArx::SetMemoryAdr ( (uint32_t) this );
-        DMArx::SetPeriphAdr ( (uint32_t) &( USART_::d() ) );
+        DMArx::SetPeriphAdr ( (uint32_t) &( USART_::data() ) );
         DMArx::SetDirection (DMArx::DataDirection::PerToMem);
         DMArx::SetMemoryTransactionSize (DMArx::DataSize::byte8);
         DMArx::SetPeriphTransactionSize (DMArx::DataSize::byte8);
@@ -65,7 +65,7 @@ public:
         enableRX();
 
         DMAtx::SetMemoryAdr ( (uint32_t) this );
-        DMAtx::SetPeriphAdr ( (uint32_t) &( USART_::d() ) );
+        DMAtx::SetPeriphAdr ( (uint32_t) &( USART_::data() ) );
         DMAtx::SetDirection (DMAtx::DataDirection::MemToPer);
         DMAtx::SetMemoryTransactionSize (DMAtx::DataSize::byte8);
         DMAtx::SetPeriphTransactionSize (DMAtx::DataSize::byte8);

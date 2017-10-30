@@ -5,6 +5,8 @@
 #include "GPIO_ral.h"
 #include "TIM_ral.h"
 #include "USART_ral.h"
+#include "ADC_ral.h"
+#include "DMA_ral.h"
 
 volatile RCC_t* RCC_d = (RCC_t*) RCC;
 volatile GPIO_t* GPIOA_d = (GPIO_t*) GPIOA;
@@ -21,6 +23,26 @@ volatile USART_t* USART1_d = (USART_t*) USART1;
 volatile USART_t* USART2_d = (USART_t*) USART2;
 volatile USART_t* USART3_d = (USART_t*) USART3;
 volatile USART_t* USART6_d = (USART_t*) USART6;
+volatile ADC_t* ADC1_d = (ADC_t*) ADC1;
+volatile ADC_t* ADC2_d = (ADC_t*) ADC2;
+volatile ADC_t* ADC3_d = (ADC_t*) ADC3;
+volatile DMAstream_t* DMA1Stream0_d = (DMAstream_t*) DMA1_Stream0;
+volatile DMAstream_t* DMA1Stream1_d = (DMAstream_t*) DMA1_Stream1;
+volatile DMAstream_t* DMA1Stream2_d = (DMAstream_t*) DMA1_Stream2;
+volatile DMAstream_t* DMA1Stream3_d = (DMAstream_t*) DMA1_Stream3;
+volatile DMAstream_t* DMA1Stream4_d = (DMAstream_t*) DMA1_Stream4;
+volatile DMAstream_t* DMA1Stream5_d = (DMAstream_t*) DMA1_Stream5;
+volatile DMAstream_t* DMA1Stream6_d = (DMAstream_t*) DMA1_Stream6;
+volatile DMAstream_t* DMA1Stream7_d = (DMAstream_t*) DMA1_Stream7;
+volatile DMAstream_t* DMA2Stream0_d = (DMAstream_t*) DMA2_Stream0;
+volatile DMAstream_t* DMA2Stream1_d = (DMAstream_t*) DMA2_Stream1;
+volatile DMAstream_t* DMA2Stream2_d = (DMAstream_t*) DMA2_Stream2;
+volatile DMAstream_t* DMA2Stream3_d = (DMAstream_t*) DMA2_Stream3;
+volatile DMAstream_t* DMA2Stream4_d = (DMAstream_t*) DMA2_Stream4;
+volatile DMAstream_t* DMA2Stream5_d = (DMAstream_t*) DMA2_Stream5;
+volatile DMAstream_t* DMA2Stream6_d = (DMAstream_t*) DMA2_Stream6;
+volatile DMAstream_t* DMA2Stream7_d = (DMAstream_t*) DMA2_Stream7;
+
 
 inline void makeDebugVar (void)
 {
@@ -39,5 +61,24 @@ inline void makeDebugVar (void)
     USART2_d->CR1_t::bits.dcb1 = 0;
     USART3_d->CR1_t::bits.dcb1 = 0;
     USART6_d->CR1_t::bits.dcb1 = 0;
+    ADC1_d->SR_t::bits.dcb1 = 0;
+    ADC2_d->SR_t::bits.dcb1 = 0;
+    ADC3_d->SR_t::bits.dcb1 = 0;
+    DMA1Stream0_d->CR_t::bits.dcb1 = 0;
+    DMA1Stream1_d->CR_t::bits.dcb1 = 0;
+    DMA1Stream2_d->CR_t::bits.dcb1 = 0;
+    DMA1Stream3_d->CR_t::bits.dcb1 = 0;
+    DMA1Stream4_d->CR_t::bits.dcb1 = 0;
+    DMA1Stream5_d->CR_t::bits.dcb1 = 0;
+    DMA1Stream6_d->CR_t::bits.dcb1 = 0;
+    DMA1Stream7_d->CR_t::bits.dcb1 = 0;
+    DMA2Stream0_d->CR_t::bits.dcb1 = 0;
+    DMA2Stream1_d->CR_t::bits.dcb1 = 0;
+    DMA2Stream2_d->CR_t::bits.dcb1 = 0;
+    DMA2Stream3_d->CR_t::bits.dcb1 = 0;
+    DMA2Stream4_d->CR_t::bits.dcb1 = 0;
+    DMA2Stream5_d->CR_t::bits.dcb1 = 0;
+    DMA2Stream6_d->CR_t::bits.dcb1 = 0;
+    DMA2Stream7_d->CR_t::bits.dcb1 = 0;
 
 }

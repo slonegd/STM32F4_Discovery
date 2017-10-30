@@ -5,6 +5,45 @@
 #include "timers.h"
 
 
+// программные таймеры
+const uint8_t timersQty = 2;
+Timers<timersQty> timers;
+auto& ledTimer = timers.all[0];
+auto& butTimer = timers.all[1];
+
+// энергонезависимые данные
+const uint8_t flashSector = 2;
+Flash<FlashData, flashSector> flash;
+
+// шим
+PWM<PWMtimer, PWMout> pwm;
+
+// уарт модбаса
+const uint8_t bufSize = 30;
+using USART_ = USART<USART1_t, bufSize, RXpin, TXpin, RTSpin>;
+USART_ uart;
+
+// модбас
+using Modbus = MBslave<InRegs, OutRegs, USART_>;
+auto modbus = Modbus(uart);
+
+// действия на входные регистры модбаса
+#define ADR(reg)    GET_ADR(InRegs, reg)
+inline void mbRegInAction ()
+{
+    switch ( modbus.getInRegAdrForAction() ) {
+        case ADR(reg0):
+            ; // сделать чтото
+            break;
+        case ADR(reg1):
+            ; // сделать чтото
+            break;
+        default: ;
+    }
+}
+
+
+
 inline void CLKinit (void)
 {
     FLASH_t::SetLatency (FLASH_t::Latency::latency_5);

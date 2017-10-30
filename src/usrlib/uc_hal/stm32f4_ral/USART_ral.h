@@ -250,28 +250,28 @@ public:
     using DMAtx = DMAstreamTX;
 
 protected:
-    static volatile USART_ral::SR_t   &s()   { return (USART_ral::SR_t &)   (*(USART_TypeDef*)USARTptr).SR;   }
-    static volatile USART_ral::DR_t   &d()   { return (USART_ral::DR_t &)   (*(USART_TypeDef*)USARTptr).DR;   }
-    static volatile USART_ral::BRR_t  &br()  { return (USART_ral::BRR_t &)  (*(USART_TypeDef*)USARTptr).BRR;  }
-    static volatile USART_ral::CR1_t  &c1()  { return (USART_ral::CR1_t &)  (*(USART_TypeDef*)USARTptr).CR1;  }
-    static volatile USART_ral::CR2_t  &c2()  { return (USART_ral::CR2_t &)  (*(USART_TypeDef*)USARTptr).CR2;  }
-    static volatile USART_ral::CR3_t  &c3()  { return (USART_ral::CR3_t &)  (*(USART_TypeDef*)USARTptr).CR3;  }
+    static volatile USART_ral::SR_t   &status()   { return (USART_ral::SR_t &)   (*(USART_TypeDef*)USARTptr).SR;   }
+    static volatile USART_ral::DR_t   &data()   { return (USART_ral::DR_t &)   (*(USART_TypeDef*)USARTptr).DR;   }
+    static volatile USART_ral::BRR_t  &boudrate()  { return (USART_ral::BRR_t &)  (*(USART_TypeDef*)USARTptr).BRR;  }
+    static volatile USART_ral::CR1_t  &conf1()  { return (USART_ral::CR1_t &)  (*(USART_TypeDef*)USARTptr).CR1;  }
+    static volatile USART_ral::CR2_t  &conf2()  { return (USART_ral::CR2_t &)  (*(USART_TypeDef*)USARTptr).CR2;  }
+    static volatile USART_ral::CR3_t  &conf3()  { return (USART_ral::CR3_t &)  (*(USART_TypeDef*)USARTptr).CR3;  }
     static volatile USART_ral::GTPR_t &gtp() { return (USART_ral::GTPR_t &) (*(USART_TypeDef*)USARTptr).GTPR; }
 public:
     static inline void ClockEnable()                { *((uint32_t*)(RCC_BASE + ClkEnOffset)) |= ClkEnMask; }
-    static inline void Enable()                     { c1().bits.UE = true; }
-    static inline void Disable()                    { c1().bits.UE = false; }
-    static inline void RXenable()                   { c1().bits.RE = true; }
-    static inline void RXdisable()                  { c1().bits.RE = false; }
-    static inline void TXenable()                   { c1().bits.TE = true; }
-    static inline void TXdisable()                  { c1().bits.TE = false; }
-    static inline void DMAtxEnable()                { c3().bits.DMAT = true; }
-    static inline void DMArxEnable()                { c3().bits.DMAR = true; }
-    static inline void SetBoudRate (Boudrate brval) { br().reg = fCPU / brval; }
-    static inline void ParityEnable ()              { c1().bits.PCE = true; }
-    static inline void ParityDisable ()             { c1().bits.PCE = false; }
-    static inline void SetParity (Parity p)         { c1().bits.PS = p; }
-    static inline void SetStopBits (StopBits sb)    { c2().bits.STOP = sb; }
+    static inline void Enable()                     { conf1().bits.UE = true; }
+    static inline void Disable()                    { conf1().bits.UE = false; }
+    static inline void RXenable()                   { conf1().bits.RE = true; }
+    static inline void RXdisable()                  { conf1().bits.RE = false; }
+    static inline void TXenable()                   { conf1().bits.TE = true; }
+    static inline void TXdisable()                  { conf1().bits.TE = false; }
+    static inline void DMAtxEnable()                { conf3().bits.DMAT = true; }
+    static inline void DMArxEnable()                { conf3().bits.DMAR = true; }
+    static inline void SetBoudRate (Boudrate brval) { boudrate().reg = fCPU / brval; }
+    static inline void ParityEnable ()              { conf1().bits.PCE = true; }
+    static inline void ParityDisable ()             { conf1().bits.PCE = false; }
+    static inline void SetParity (Parity p)         { conf1().bits.PS = p; }
+    static inline void SetStopBits (StopBits sb)    { conf2().bits.STOP = sb; }
 };
 
 using USART1_t = USARTx<USART1_BASE, DMA2stream5, DMA2stream7, RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART1EN_Msk>;

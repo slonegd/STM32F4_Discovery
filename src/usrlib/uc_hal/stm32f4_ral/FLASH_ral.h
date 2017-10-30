@@ -162,24 +162,24 @@ public:
     using Sectors = FLASH_ral::CR_t::Sectors;
     using ProgSize = FLASH_ral::CR_t::ProgSize;
 
-    static volatile ACR_t           &ac() { return (ACR_t &)           FLASH->ACR;  }
-    static volatile KEYR_t          &key() { return (KEYR_t &)         FLASH->KEYR; }
-    static volatile FLASH_ral::CR_t &cr() { return (FLASH_ral::CR_t &) FLASH->CR;   }
-    static volatile FLASH_ral::SR_t &sr() { return (FLASH_ral::SR_t &) FLASH->SR;   }
+    static volatile FLASH_ral::ACR_t  &accessContr() { return (FLASH_ral::ACR_t &)  FLASH->ACR;  }
+    static volatile FLASH_ral::KEYR_t &key()         { return (FLASH_ral::KEYR_t &) FLASH->KEYR; }
+    static volatile FLASH_ral::CR_t   &conf()        { return (FLASH_ral::CR_t &)   FLASH->CR;   }
+    static volatile FLASH_ral::SR_t   &status()      { return (FLASH_ral::SR_t &)   FLASH->SR;   }
     static const uint32_t Key1 = 0x45670123;
     static const uint32_t Key2 = 0xCDEF89AB;
 
-    static inline void SetLatency (Latency L)  { ac().bits.LATENCY = L; }
-    static inline void Lock ()                 { cr().bits.LOCK = true; }
-    static inline void SetProgMode()           { cr().bits.PG = true; }
-    static inline void SetProgSize(ProgSize s) { cr().bits.PSIZE = s; }
-    static inline void EndOfProgInterruptEn()  { cr().bits.EOPIE = true; }
-    static inline bool EndOfProg()             { return sr().bits.EOP; }
-    static inline void ClearEndOfProgFlag()    { sr().bits.EOP = true; }
-    static inline bool Busy()                  { return sr().bits.BSY; }
+    static inline void SetLatency (Latency L)  { accessContr().bits.LATENCY = L; }
+    static inline void Lock ()                 { conf().bits.LOCK = true; }
+    static inline void SetProgMode()           { conf().bits.PG = true; }
+    static inline void SetProgSize(ProgSize s) { conf().bits.PSIZE = s; }
+    static inline void EndOfProgInterruptEn()  { conf().bits.EOPIE = true; }
+    static inline bool EndOfProg()             { return status().bits.EOP; }
+    static inline void ClearEndOfProgFlag()    { status().bits.EOP = true; }
+    static inline bool Busy()                  { return status().bits.BSY; }
     static inline void Unlock ()
     {
-        if ( cr().bits.LOCK ) {
+        if ( conf().bits.LOCK ) {
             key().reg = Key1;
             key().reg = Key2;
         }
@@ -187,9 +187,9 @@ public:
     template <Sectors s>
     static inline void StartEraseSector ()
     {
-        cr().bits.SER = true;
-        cr().bits.SNB = s;
-        cr().bits.STRT = true;
+        conf().bits.SER = true;
+        conf().bits.SNB = s;
+        conf().bits.STRT = true;
     }
 
 };

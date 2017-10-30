@@ -235,21 +235,21 @@ typedef struct
 } TIM_TypeDef;
 */
 
-using namespace TIM_ral;
 
-struct TIM_t : public CR1_t,
-               public CR2_t,
-               public SMCR_t,
-               public DIER_t,
+
+struct TIM_t : public TIM_ral::CR1_t,
+               public TIM_ral::CR2_t,
+               public TIM_ral::SMCR_t,
+               public TIM_ral::DIER_t,
                public TIM_ral::SR_t,
-               public EGR_t,
-               public CCMR_t,
-               public CCER_t,
-               public CNT_t,
-               public PSC_t,
-               public ARR_t,
-               public RCR_t,
-               public CCR_t
+               public TIM_ral::EGR_t,
+               public TIM_ral::CCMR_t,
+               public TIM_ral::CCER_t,
+               public TIM_ral::CNT_t,
+               public TIM_ral::PSC_t,
+               public TIM_ral::ARR_t,
+               public TIM_ral::RCR_t,
+               public TIM_ral::CCR_t
 {
 
 };
@@ -261,23 +261,23 @@ public:
     using CompareMode = TIM_t::CCMR_t::CompareMode;
     static const AFR_t::AF AltFunc = af;
 protected:
-    static volatile CR1_t  &c1()    { return (CR1_t &)    (*(TIM_TypeDef*)TIMptr).CR1;   }
-    static volatile CR2_t  &c2()    { return (CR2_t &)    (*(TIM_TypeDef*)TIMptr).CR2;   }
-    static volatile CCMR_t &ccm()   { return (CCMR_t &)   (*(TIM_TypeDef*)TIMptr).CCMR1; }
-    static volatile CCER_t &cce()   { return (CCER_t &)   (*(TIM_TypeDef*)TIMptr).CCER;  }
-    static volatile PSC_t  &psc()   { return (PSC_t &)    (*(TIM_TypeDef*)TIMptr).PSC;   }
-    static volatile ARR_t  &ar()    { return (ARR_t &)    (*(TIM_TypeDef*)TIMptr).ARR;   }
-    static volatile CCR_t  &cc()    { return (CCR_t &)    (*(TIM_TypeDef*)TIMptr).CCR1;  }
+    static volatile TIM_ral::CR1_t  &conf1()    { return (TIM_ral::CR1_t &)    (*(TIM_TypeDef*)TIMptr).CR1;   }
+    static volatile TIM_ral::CR2_t  &conf2()    { return (TIM_ral::CR2_t &)    (*(TIM_TypeDef*)TIMptr).CR2;   }
+    static volatile TIM_ral::CCMR_t &captureMode()   { return (TIM_ral::CCMR_t &)   (*(TIM_TypeDef*)TIMptr).CCMR1; }
+    static volatile TIM_ral::CCER_t &captureEn()   { return (TIM_ral::CCER_t &)   (*(TIM_TypeDef*)TIMptr).CCER;  }
+    static volatile TIM_ral::PSC_t  &prescaler()   { return (TIM_ral::PSC_t &)    (*(TIM_TypeDef*)TIMptr).PSC;   }
+    static volatile TIM_ral::ARR_t  &autoReload()    { return (TIM_ral::ARR_t &)    (*(TIM_TypeDef*)TIMptr).ARR;   }
+    static volatile TIM_ral::CCR_t  &capture()    { return (TIM_ral::CCR_t &)    (*(TIM_TypeDef*)TIMptr).CCR1;  }
 
 public:
     // включает тактирование таймера
     static inline void ClockEnable()      { *((uint32_t*)(RCC_BASE + ClkEnOffset)) |= ClkEnMask; }
-    static inline void CounterEnable()    { c1().bits.CEN = true; }
-    static inline bool IsCount()          { return c1().bits.CEN; }
-    static inline void CounterDisable()   { c1().bits.CEN = false; }
-    static inline void AutoReloadEnable() { c1().bits.ARPE = true; }
-    static inline void SetAutoReloadValue (uint32_t val) { ar().reg = val; }
-    static inline void SetPrescaller (uint32_t val)      { psc().reg = val; }
+    static inline void CounterEnable()    { conf1().bits.CEN = true; }
+    static inline bool IsCount()          { return conf1().bits.CEN; }
+    static inline void CounterDisable()   { conf1().bits.CEN = false; }
+    static inline void AutoReloadEnable() { conf1().bits.ARPE = true; }
+    static inline void SetAutoReloadValue (uint32_t val) { autoReload().reg = val; }
+    static inline void SetPrescaller (uint32_t val)      { prescaler().reg = val; }
     template <CompareMode cm, uint8_t channel>
     static inline void  SetCompareMode ()
     {
@@ -287,16 +287,16 @@ public:
         constexpr uint8_t offset = 4 + 8 * (channel / (regN*2 + 2));
         constexpr uint32_t ClearMask = (uint32_t) 0b111 << offset;
         constexpr uint32_t SetMask = (uint32_t) cm << offset;
-        MODIFY_REG (ccm().regs[regN], ClearMask, SetMask);
+        MODIFY_REG (captureMode().regs[regN], ClearMask, SetMask);
     }
     template <uint8_t channel>
-    static inline void CompareEnable ()   { cce().reg |= (uint16_t)1 << (channel-1)*4; }
+    static inline void CompareEnable ()   { captureEn().reg |= (uint16_t)1 << (channel-1)*4; }
     template <uint8_t channel>
-    static inline void CompareDisable ()  { cce().reg &= ~( (uint16_t)1 << (channel-1)*4 ); }
+    static inline void CompareDisable ()  { captureEn().reg &= ~( (uint16_t)1 << (channel-1)*4 ); }
     template <uint8_t channel>
-    static inline bool IsCompareEnable () { return ( (cce().reg & ((uint16_t)1 << (channel-1)*4)) != 0); }
+    static inline bool IsCompareEnable () { return ( (captureEn().reg & ((uint16_t)1 << (channel-1)*4)) != 0); }
     template <uint8_t channel>
-    static inline void SetCompareValue (uint32_t val) { cc().regs[channel-1] = val; }
+    static inline void SetCompareValue (uint32_t val) { capture().regs[channel-1] = val; }
     
 };
 

@@ -9,9 +9,12 @@
 #include "FLASH_ral.h"
 #include "DebugVar.h"
 #include "modbusSlave.h"
+#include "adc_hal.h"
 
 #define F_OSC   8000000UL
 #define F_CPU   168000000UL
+
+const uint32_t fCPU = 168000000;
 
 // discoveri leds
 using LedPort = PD;
@@ -19,14 +22,16 @@ using Bled = PD15;
 using Rled = PD14;
 using Oled = PD13;
 using Gled = PD12;
+// pinlist test
 using Leds = PinList<Bled, Gled, Oled>;
 
+// discovery button
 using Button = PA0;
 
+// led for PWM
 using PWMout = Rled;
 using PWMtimer = TIM4_t;
 
-const uint32_t fCPU = 168000000;
 
 // энергонезависимые данные
 struct FlashData {
@@ -34,15 +39,19 @@ struct FlashData {
     uint16_t d2;
 };
 
-// модбас
-enum class InRegs {
-    reg0,
-    reg1,
-    Qty
+// uart pin
+using RXpin = PA3;
+using TXpin = PA2;
+using RTSpin = PA5;
+
+// modbus register
+struct InRegs {
+    uint16_t reg0;
+    uint16_t reg1;
 };
-enum class OutRegs {
-    reg0,
-    reg1,
-    reg2,
-    Qty
+struct OutRegs {
+    uint16_t reg0;
+    uint16_t reg1;
 };
+
+// adc

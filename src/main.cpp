@@ -2,60 +2,6 @@
 
 uint16_t i = 0;
 
-// программные таймеры
-const uint8_t timersQty = 2;
-Timers<timersQty> timers;
-auto& ledTimer = timers.all[0];
-auto& butTimer = timers.all[1];
-
-// энергонезависимые данные
-const uint8_t flashSector = 2;
-Flash<FlashData, flashSector> flash;
-
-// шим
-PWM<PWMtimer, PWMout> pwm;
-
-// уарт модбаса
-const uint8_t bufSize = 30;
-using USART_ = USART<USART1_t, 30, PA3, PA2, PA5>;
-USART_ uart;
-
-struct InReg {
-    uint16_t reg0;
-    uint16_t reg1;
-};
-struct OutReg {
-    uint16_t reg0;
-    uint16_t reg1;
-};
-using Modbusst = stMBslave<InReg>;
-Modbusst modbusst;
-
-
-
-template<> inline void mbRegInActionst<GET_ADR(InReg, reg0)>()
-{
-    modbusst.i = 0;
-}
-
-// модбас
-using Modbus = MBslave<InRegs, OutRegs, USART_>;
-auto modbus = Modbus(uart);
-
-// действия на входные регистры модбаса
-inline void mbRegInAction ()
-{
-    switch ( modbus.getInRegForAction() ) {
-        case InRegs::reg0:
-            ;
-            break;
-        case InRegs::reg1:
-            ;
-            break;
-        default: ;
-    }
-}
-
 int main(void)
 {
     makeDebugVar();
@@ -86,6 +32,10 @@ int main(void)
     pwm.setD (50);
     pwm.outEnable();
 
+    // adc
+    ADC1_t::ClockEnable();
+    ADCaverage<ADC1_t, 16, PC0, DMA1stream0> current;
+
     // инициализация программных таймеров задач
     ledTimer.setTimeAndStart (500);
     butTimer.setTimeAndStart (200);
@@ -97,9 +47,7 @@ int main(void)
 
         if ( modbus.uart.rxComplete() ) {
             modbus.handler();
-            // действия на изменения входящих регистров
-            modbus.foreachRegInActions (mbRegInAction);
-            modbusst.foreachRegInActions (mbRegInActionst<1>);
+            modbus.foreachRegForActions (mbRegInAction);
         }
 
         if ( ledTimer.event() ) {

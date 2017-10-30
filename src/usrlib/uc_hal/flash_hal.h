@@ -1,17 +1,16 @@
-/**
- * ОСНОВНЫЕ МОМЕНТЫ:
- * Работа с еепром с помощью структуры struct EEPROMst,
- * которая должна быть создана в файле macros.h.
- * Состав структуры произвольный,
- * минимальный размер данных 16 бит (8 недопустимо)
- * При инициализации прочитать из памяти в экземпляр EEPROMst с помощью функции EEPROMRead().
- * Внутри программы работаем с экземпляром EEPROMst без каких либо ограничений.
- * Периодически вызываем функцию EEPROMUpd() для обновления изменившихся значений в памяти
+/** шаблонный класс сохранения данных во flash
+ *  при инициализации необходимо указать
+ *      структуру, которая будет сохраняться
+ *      сектор флеша, куда записывать
+ *  Размер структуры не более 255 байт, поскольку кодируються во флеше
+ *  в виде двух байт, один данные, второй их индекс в байтовом массиве
  * 
- * Реализация для STM32 имитирует еепром, занимая страницу флэш памяти
- * указатель на структуру страницы должен быть определен в macros.h
- *
- */
+ *  Перед работой с данными, их надо сначала прочитать, и если результат
+ *  отрицательный, то инициировать значениями по умолчанию
+ * 
+ *  Для обновления изменённых данных периодически вызывать update
+ * 
+ *////////////////////////////////////////////////////////////////////////////
   
 #pragma once
 
@@ -20,7 +19,7 @@
 #include "FLASH_ral.h"
 
 template <uint8_t sector> static constexpr uint32_t Addres();
-template <uint8_t sector> static constexpr int32_t Size();
+template <uint8_t sector> static constexpr int32_t  Size();
 
 
 template <class DATA, uint8_t sector>
@@ -122,7 +121,7 @@ void Flash<Data,sector>::update ()
 		CheckErase
 	};
     static FuncState state = CheckChanges;
-
+    static volatile uint8_t dataWrite = 0;
     static uint8_t byteN = 0;
 
 	switch (state) {
@@ -145,7 +144,8 @@ void Flash<Data,sector>::update ()
             FLASH_t::Unlock();
             FLASH_t::SetProgMode();
             FLASH_t::SetProgSize (FLASH_t::ProgSize::x16);
-            flash.word[flashOffset] = (uint16_t)byteN << 8 | original[byteN];
+            dataWrite = original[byteN];
+            flash.word[flashOffset] = (uint16_t)byteN << 8 | dataWrite;
             state = CheckWrite;
         }
         break;
@@ -154,7 +154,7 @@ void Flash<Data,sector>::update ()
         if ( FLASH_t::EndOfProg() ) {
             FLASH_t::ClearEndOfProgFlag();
             FLASH_t::Lock();
-            copy[byteN] = original[byteN];
+            copy[byteN] = dataWrite;
             flashOffset++;
             if ( flashOffset >= Size<sector>() ) {
                 needErase = true;

@@ -24,8 +24,8 @@ namespace DMA_ral {
             veryHi  = 0b11
         };
         enum Channels {
-            _1 = 0b000,
-            _2, _3, _4, _5, _6, _7
+            _0 = 0b000,
+            _1, _2, _3, _4, _5, _6, _7
         };
         struct Bits {
             // Bit 0 EN: Stream enable / flag stream ready when read low
@@ -124,38 +124,38 @@ struct DMAstream_t : public DMA_ral::CR_t,
                      public DMA_ral::M0AR_t,
                      public DMA_ral::M1AR_t,
                      public DMA_ral::FCR_t
-{
-
-};
+{ };
 
 template <uint32_t DMAstreamPtr>
 class DMAstream : DMAstream_t
 {
-protected:
-    static volatile DMA_ral::CR_t   &c()   { return (DMA_ral::CR_t &)   (*(DMA_Stream_TypeDef*)DMAstreamPtr).CR;   }
-    static volatile DMA_ral::NDTR_t &ndt() { return (DMA_ral::NDTR_t &) (*(DMA_Stream_TypeDef*)DMAstreamPtr).NDTR; }
-    static volatile DMA_ral::PAR_t  &pa()  { return (DMA_ral::PAR_t &)  (*(DMA_Stream_TypeDef*)DMAstreamPtr).PAR;  }
-    static volatile DMA_ral::M0AR_t &m0a() { return (DMA_ral::M0AR_t &) (*(DMA_Stream_TypeDef*)DMAstreamPtr).M0AR; }
-    static volatile DMA_ral::M1AR_t &m1a() { return (DMA_ral::M1AR_t &) (*(DMA_Stream_TypeDef*)DMAstreamPtr).M1AR; }
-    static volatile DMA_ral::FCR_t  &fc()  { return (DMA_ral::FCR_t &)  (*(DMA_Stream_TypeDef*)DMAstreamPtr).FCR;  }
-
 public:
+
     using DataDirection = DMA_ral::CR_t::DataDirection;
     using DataSize = DMA_ral::CR_t::DataSize;
     using Channels = DMA_ral::CR_t::Channels;
-    static inline void Enable()  { c().bits.EN = true; }
-    static inline void Disable() { c().bits.EN = false; }
-    static inline void SetMemoryAdr (uint32_t val) { m0a().reg = val; }
-    static inline void SetPeriphAdr (uint32_t val) { pa().reg = val; }
-    static inline void SetDirection (DataDirection val) { c().bits.DIR = val; }
-    static inline void SetMemoryTransactionSize (DataSize val) { c().bits.MSIZE = val; }
-    static inline void SetPeriphTransactionSize (DataSize val) { c().bits.PSIZE = val; }
-    static inline void SetMemoryInc (bool b)       { c().bits.MINC = b; }
-    static inline void SetPeriphInc (bool b)       { c().bits.PINC = b; }
-    static inline void SetCircularMode (bool b)    { c().bits.CIRC = b; }
-    static inline void SetChannel (Channels val)   { c().bits.CHSEL = val; }
-    static inline void SetQtyTransactions (uint16_t val) { ndt().reg = val; }
-    static inline uint16_t QtyTransactionsLeft()   { return ndt().reg; }
+    static inline void Enable()  { conf().bits.EN = true; }
+    static inline void Disable() { conf().bits.EN = false; }
+    static inline void SetMemoryAdr (uint32_t val) { memAdr0().reg = val; }
+    static inline void SetPeriphAdr (uint32_t val) { perAdr().reg = val; }
+    static inline void SetDirection (DataDirection val) { conf().bits.DIR = val; }
+    static inline void SetMemoryTransactionSize (DataSize val) { conf().bits.MSIZE = val; }
+    static inline void SetPeriphTransactionSize (DataSize val) { conf().bits.PSIZE = val; }
+    static inline void SetMemoryInc (bool b)       { conf().bits.MINC = b; }
+    static inline void SetPeriphInc (bool b)       { conf().bits.PINC = b; }
+    static inline void SetCircularMode (bool b)    { conf().bits.CIRC = b; }
+    static inline void SetChannel (Channels val)   { conf().bits.CHSEL = val; }
+    static inline void SetQtyTransactions (uint16_t val) { nData().reg = val; }
+    static inline uint16_t QtyTransactionsLeft()   { return nData().reg; }
+
+
+protected:
+    static volatile DMA_ral::CR_t   &conf()      { return (DMA_ral::CR_t &)   (*(DMA_Stream_TypeDef*)DMAstreamPtr).CR;   }
+    static volatile DMA_ral::NDTR_t &nData()     { return (DMA_ral::NDTR_t &) (*(DMA_Stream_TypeDef*)DMAstreamPtr).NDTR; }
+    static volatile DMA_ral::PAR_t  &perAdr()    { return (DMA_ral::PAR_t &)  (*(DMA_Stream_TypeDef*)DMAstreamPtr).PAR;  }
+    static volatile DMA_ral::M0AR_t &memAdr0()   { return (DMA_ral::M0AR_t &) (*(DMA_Stream_TypeDef*)DMAstreamPtr).M0AR; }
+    static volatile DMA_ral::M1AR_t &memAdr1()   { return (DMA_ral::M1AR_t &) (*(DMA_Stream_TypeDef*)DMAstreamPtr).M1AR; }
+    static volatile DMA_ral::FCR_t  &FIFOcontr() { return (DMA_ral::FCR_t &)  (*(DMA_Stream_TypeDef*)DMAstreamPtr).FCR;  }
 
 };
 

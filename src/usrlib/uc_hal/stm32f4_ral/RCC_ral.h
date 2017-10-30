@@ -317,24 +317,24 @@ class RCC_t : public RCC_ral::CR_t,
               public APB2ENR_t
 {
 public:	
-    static volatile RCC_ral::CR_t &cr()     { return (RCC_ral::CR_t &) RCC->CR;     }
-    static volatile PLLCFGR_t     &pllcfg() { return (PLLCFGR_t &)     RCC->PLLCFGR;}
-    static volatile CFGR_t        &cfg()    { return (CFGR_t &)        RCC->CFGR;   }
+    static volatile RCC_ral::CR_t      &clockContr() { return (RCC_ral::CR_t &)      RCC->CR;      }
+    static volatile RCC_ral::PLLCFGR_t &pllConf()    { return (RCC_ral::PLLCFGR_t &) RCC->PLLCFGR; }
+    static volatile RCC_ral::CFGR_t    &conf()       { return (RCC_ral::CFGR_t &)    RCC->CFGR;    }
 
-    static inline void HSEon (void) { cr().bits.HSEON = 1; }
-    static inline void waitHSEready (void) { while (!cr().bits.HSERDY) { } }
-    static inline void PLLon (void) { cr().bits.PLLON = 1; }
-    static inline void waitPLLready (void) { while (!cr().bits.PLLRDY) { } }
-    static inline void setPLLP (PLLPdiv div) { pllcfg().bits.PLLP = div; }
+    static inline void HSEon (void) { clockContr().bits.HSEON = 1; }
+    static inline void waitHSEready (void) { while (!clockContr().bits.HSERDY) { } }
+    static inline void PLLon (void) { clockContr().bits.PLLON = 1; }
+    static inline void waitPLLready (void) { while (!clockContr().bits.PLLRDY) { } }
+    static inline void setPLLP (PLLPdiv div) { pllConf().bits.PLLP = div; }
     // 2 ≤ var ≤ 63
-    static inline void setPLLM (uint8_t var) { pllcfg().bits.PLLM = var; }
+    static inline void setPLLM (uint8_t var) { pllConf().bits.PLLM = var; }
     // 50 ≤ var ≤ 432
-    static inline void setPLLN (uint16_t var) { pllcfg().bits.PLLN = var; }
+    static inline void setPLLN (uint16_t var) { pllConf().bits.PLLN = var; }
     // 2 ≤ var ≤ 15
-    static inline void setPLLQ (uint8_t var) { pllcfg().bits.PLLQ = var; }
-    static inline void setPLLsource (PLLsource source) { pllcfg().bits.PLLSRC = source; }
-    static inline void setAHBprescaler (AHBprescaler prescaler) { cfg().bits.HPRE = prescaler; }
-    static inline void setAPB1prescaler (APBprescaler prescaler) { cfg().bits.PPRE1 = prescaler; }
-    static inline void setAPB2prescaler (APBprescaler prescaler) { cfg().bits.PPRE2 = prescaler; }
-    static inline void systemClockSwitch (SystemClockSwitch sw) { cfg().bits.SW = sw; }
+    static inline void setPLLQ (uint8_t var) { pllConf().bits.PLLQ = var; }
+    static inline void setPLLsource (PLLsource source) { pllConf().bits.PLLSRC = source; }
+    static inline void setAHBprescaler (AHBprescaler prescaler) { conf().bits.HPRE = prescaler; }
+    static inline void setAPB1prescaler (APBprescaler prescaler) { conf().bits.PPRE1 = prescaler; }
+    static inline void setAPB2prescaler (APBprescaler prescaler) { conf().bits.PPRE2 = prescaler; }
+    static inline void systemClockSwitch (SystemClockSwitch sw) { conf().bits.SW = sw; }
 };

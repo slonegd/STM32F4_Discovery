@@ -12,7 +12,7 @@
 #pragma once
 
 #include "usart_hal.h"
-
+/*
 template <class InRegs_, class OutRegs_, class UART_>
 class MBslave
 {
@@ -61,38 +61,69 @@ private:
     };
     uint16_t nLastRegAction;
 };
+*/
 
-
-template <class InRegs_>
-class stMBslave
+template <class InRegs_, class OutRegs_, class UART_>
+class MBslave
 {
 public:
-    using InRegStructure = InRegs_;
     static const uint16_t InRegQty = sizeof(InRegs_) / 2;
-    constexpr uint16_t adr (uint16_t& reg) { return offsetof(InRegs_, reg)/2; }
+    static const uint16_t OutRegQty = sizeof(OutRegs_) / 2;
+
     union {
         InRegs_ inRegs;
         uint16_t arInRegs[InRegQty];
     };
+    union {
+        OutRegs_ outRegs;
+        uint16_t arOutRegs[OutRegQty];
+    };
+    union {
+        InRegs_ inRegsMin;
+        uint16_t arInRegsMin[InRegQty];
+    };
+    union {
+        InRegs_ inRegsMax;
+        uint16_t arInRegsMax[InRegQty];
+    };
+
+    UART_& uart;
+    
+    
+    MBslave(UART_& usart) : arInRegs{0}, arOutRegs{0}, arInRegsMin{0},
+                            arInRegsMax{0}, uart(usart), 
+                            inRegAdrForAction(InRegQty)
+    { }
+
+
+    // обрабатывает поступивший запрос, по необходимости формирует ответ
+    // переводит уарт на отправку, если ответа не надо, то на приём
+    inline void handler()
+    {
+
+    }
 
     // перебирает все входные регистров, на которые пришел запрос
-    // внутри функции вызывать метод getInRegForAction для определения регистра
+    // внутри функции вызывать метод getInRegAdrForAction для определения
+    // адреса регистра
     template <class function>
-    inline function foreachRegInActions (function f) 
+    inline function foreachRegForActions (function f) 
     {
-        // временно не верно
-        for (i = 0; i < InRegQty; i++ ) {
+        for (; inRegAdrForAction <= lastInRegAdrForAction; ++inRegAdrForAction ) {
             f();
         }
         return f;
     }
+    inline uint16_t getInRegAdrForAction()
+    {
+        return inRegAdrForAction;
+    }
 
-    uint16_t i;
+
+private:
+    uint16_t inRegAdrForAction;
+    uint16_t lastInRegAdrForAction;
     
 };
-
-template<uint16_t RegAdr>
-inline void mbRegInActionst()
-{ }
 
 #define GET_ADR(struct ,reg)     (offsetof(struct, reg) / 2)
