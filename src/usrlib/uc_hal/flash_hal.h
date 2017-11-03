@@ -17,9 +17,48 @@
 #include <stdbool.h>
 #include <string.h>
 #include "FLASH_ral.h"
+#include "constDef.h"
 
-template <uint8_t sector> static constexpr uint32_t Addres();
-template <uint8_t sector> static constexpr int32_t  Size();
+using AddresDef = ConstDef<uint32_t>;
+using SizeDef = ConstDef<int32_t>;
+
+template<uint8_t sector> constexpr ConstDef<uint32_t> Addres() { return {0, false}; }
+template<uint8_t sector> constexpr ConstDef<int32_t>  Size()   { return {0, false}; }
+
+template<> constexpr AddresDef Addres<1>() { return {0x08004000, true}; }
+template<> constexpr SizeDef Size<1>()     { return {16*1024, true};    }
+
+template<> constexpr AddresDef Addres<2>() { return {0x08008000, true}; }
+template<> constexpr SizeDef Size<2>()     { return {16*1024, true};    }
+
+template<> constexpr AddresDef Addres<3>() { return {0x0800C000, true}; }
+template<> constexpr SizeDef Size<3>()     { return {16*1024, true};    }
+
+template<> constexpr AddresDef Addres<4>() { return {0x08010000, true}; }
+template<> constexpr SizeDef Size<4>()     { return {64*1024, true};    }
+
+template<> constexpr AddresDef Addres<5>() { return {0x08020000, true}; }
+template<> constexpr SizeDef Size<5>()     { return {128*1024, true};   }
+
+template<> constexpr AddresDef Addres<6>() { return {0x08040000, true}; }
+template<> constexpr SizeDef Size<6>()     { return {128*1024, true};   }
+
+template<> constexpr AddresDef Addres<7>() { return {0x08060000, true}; }
+template<> constexpr SizeDef Size<7>()     { return {128*1024, true};   }
+
+template<> constexpr AddresDef Addres<8>() { return {0x08080000, true}; }
+template<> constexpr SizeDef Size<8>()     { return {128*1024, true};   }
+
+template<> constexpr AddresDef Addres<9>() { return {0x080A0000, true}; }
+template<> constexpr SizeDef Size<9>()     { return {128*1024, true};   }
+
+template<> constexpr AddresDef Addres<10>() { return {0x080C0000, true}; }
+template<> constexpr SizeDef Size<10>()     { return {128*1024, true};   }
+
+template<> constexpr AddresDef Addres<11>() { return {0x080E0000, true}; }
+template<> constexpr SizeDef Size<11>()     { return {128*1024, true};   }
+
+
 
 
 template <class DATA, uint8_t sector>
@@ -34,17 +73,19 @@ public:
     Flash ()
     {
         static_assert (
-            sector >= 2 && sector <= 11,
-            "недопустимый сектор"
+            Addres<sector>().defined,
+            "Недопустимый сектор памяти"
         );
         static_assert (
             sizeof(DATA) < 255,
-            "структура данных слишком велика"
+            "Размер сохраняемой структцры не может превышать 255 байт"
         );
         FLASH_t::EndOfProgInterruptEn();
     }
 private:
     static constexpr uint8_t QtyBytes = sizeof(DATA);
+    static const uint32_t SectorAddr = Addres<sector>().val;
+    static const int32_t SectorSize = Size<sector>().val;
     uint8_t copy[QtyBytes];
     uint8_t* original = (uint8_t*)this;
     int32_t flashOffset;
@@ -54,10 +95,10 @@ private:
         uint8_t ind;   
     };
     union Flash_t {
-        ByteInd_t data[Size<sector>()/2];
-        uint16_t word[Size<sector>()/2];
+        ByteInd_t data[SectorSize/2];
+        uint16_t word[SectorSize/2];
     };
-    volatile Flash_t& flash = *( (Flash_t *) Addres<sector>() );
+    volatile Flash_t& flash = *( (Flash_t *) SectorAddr );
 };
 
 
@@ -70,7 +111,7 @@ bool Flash<Data,sector>::readFromFlash ()
     // чтение данных в копию data в виде массива
     flashOffset = -1;
     bool indExist[QtyBytes] = {false};
-    for (uint32_t i = 0; i < Size<sector>(); i++) {
+    for (uint32_t i = 0; i < SectorSize; i++) {
         uint8_t index;
         index = flash.data[i].ind;
         if ( index < QtyBytes) {
@@ -89,7 +130,7 @@ bool Flash<Data,sector>::readFromFlash ()
     }
 
     // проверка остальной части сектора флэш
-    for (uint32_t i = flashOffset; i < Size<sector>(); i++) {
+    for (uint32_t i = flashOffset; i < SectorSize; i++) {
         if (flash.word[i] != 0xFFFF) {
             needErase = true;
             return false;    
@@ -156,7 +197,7 @@ void Flash<Data,sector>::update ()
             FLASH_t::Lock();
             copy[byteN] = dataWrite;
             flashOffset++;
-            if ( flashOffset >= Size<sector>() ) {
+            if ( flashOffset >= SectorSize ) {
                 needErase = true;
             }
             state = CheckChanges;
@@ -177,7 +218,7 @@ void Flash<Data,sector>::update ()
             FLASH_t::Lock();
             // проверка, что стёрли
             bool tmp = true;
-            for (uint32_t i = 0; i < Size<sector>(); i++) {
+            for (uint32_t i = 0; i < SectorSize; i++) {
                 tmp &= (flash.word[i] == 0xFFFF);
             }
             if (tmp) {
@@ -193,38 +234,7 @@ void Flash<Data,sector>::update ()
 
 
 
-template<> constexpr uint32_t Addres<1>()  { return 0x08004000; }
-template<> constexpr int32_t Size<1>()     { return 16*1024;    }
 
-template<> constexpr uint32_t Addres<2>()  { return 0x08008000; }
-template<> constexpr int32_t Size<2>()     { return 16*1024;    }
-
-template<> constexpr uint32_t Addres<3>()  { return 0x0800C000; }
-template<> constexpr int32_t Size<3>()     { return 16*1024;    }
-
-template<> constexpr uint32_t Addres<4>()  { return 0x08010000; }
-template<> constexpr int32_t Size<4>()     { return 64*1024;    }
-
-template<> constexpr uint32_t Addres<5>()  { return 0x08020000; }
-template<> constexpr int32_t Size<5>()     { return 128*1024;   }
-
-template<> constexpr uint32_t Addres<6>()  { return 0x08040000; }
-template<> constexpr int32_t Size<6>()     { return 128*1024;   }
-
-template<> constexpr uint32_t Addres<7>()  { return 0x08060000; }
-template<> constexpr int32_t Size<7>()     { return 128*1024;   }
-
-template<> constexpr uint32_t Addres<8>()  { return 0x08080000; }
-template<> constexpr int32_t Size<8>()     { return 128*1024;   }
-
-template<> constexpr uint32_t Addres<9>()  { return 0x080A0000; }
-template<> constexpr int32_t Size<9>()     { return 128*1024;   }
-
-template<> constexpr uint32_t Addres<10>() { return 0x080C0000; }
-template<> constexpr int32_t Size<10>()    { return 128*1024;   }
-
-template<> constexpr uint32_t Addres<11>() { return 0x080E0000; }
-template<> constexpr int32_t Size<11>()    { return 128*1024;   }
 
 
 

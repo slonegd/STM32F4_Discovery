@@ -54,4 +54,6 @@ v0.222  начал modbusSlave.h
 
 v0.223  начал adc_hal.h, в работе уарт модбас дма ацп
 
+v0.224  static_assert в hal
+
 

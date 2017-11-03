@@ -15,42 +15,54 @@
 #include <stdint.h>
 #include "TIM_ral.h"
 #include "pin_hal.h"
+#include "constDef.h"
 
+namespace PWM_HAL {
+    using ChannelDef = ConstDef<uint8_t>;
+    template<class Timer, class Pin> constexpr PWM_HAL::ChannelDef Channel() { return {0, false}; }
 
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM2_t,PA0>()  { return {1, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM2_t,PA1>()  { return {2, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM2_t,PA2>()  { return {3, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM2_t,PA3>()  { return {4, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM2_t,PA5>()  { return {1, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM2_t,PA15>() { return {1, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM2_t,PB3>()  { return {2, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM2_t,PB10>() { return {3, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM2_t,PB11>() { return {4, true}; }
 
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM3_t,PA6>()  { return {1, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM3_t,PA7>()  { return {2, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM3_t,PB0>()  { return {3, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM3_t,PB1>()  { return {4, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM3_t,PB4>()  { return {1, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM3_t,PB5>()  { return {2, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM3_t,PC6>()  { return {1, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM3_t,PC7>()  { return {2, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM3_t,PC8>()  { return {3, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM3_t,PC9>()  { return {4, true}; }
+
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM4_t,PB6>()  { return {1, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM4_t,PB7>()  { return {2, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM4_t,PB8>()  { return {3, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM4_t,PB9>()  { return {4, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM4_t,PD12>() { return {1, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM4_t,PD13>() { return {2, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM4_t,PD14>() { return {3, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM4_t,PD15>() { return {4, true}; }
+}
 
 
 template <class Timer, class Pin>
 class PWM
 {
-private:
-    // частота в Гц
-    uint16_t freq;
-    // коэффициент заполнения в процентах
-    uint16_t d;
-    // таймер считает до, зависит от частоты
-    uint32_t countTo;
-    // номер канала, завивист от парты таймер-пин
-    // инициализируеться для каждой парты тамер-пин
-    static const uint8_t channel;
-
-    void init (void)
-    {
-        Pin::Port::ClockEnable();
-        Pin::Configure ( Pin::Mode::AlternateMode,
-                         Pin::OutType::PushPull,
-                         Pin::OutSpeed::High,
-                         Pin::PullResistor::No);
-        Pin::template SetAltFunc <Timer::AltFunc> ();
-         
-        Timer::ClockEnable();
-        Timer::AutoReloadEnable();
-        Timer::template SetCompareMode <Timer::CompareMode::PWMmode, channel> ();
-        Timer::CounterEnable();
-    }
 public:
     PWM () : d(0)
     {
+        static_assert (
+            PWM_HAL::Channel<Timer,Pin>().defined,
+            "Вывод контроллера не поддерживает функцию ШИМ с этим таймером"
+        );
         init();
     }
     inline void outEnable (void)  { Timer::template CompareEnable <channel>(); }
@@ -72,6 +84,31 @@ public:
         this->d = d;
         Timer::template SetCompareValue <channel> (countTo * d / 100);
     }
+
+private:
+    // частота в Гц
+    uint16_t freq;
+    // коэффициент заполнения в процентах
+    uint16_t d;
+    // таймер считает до, зависит от частоты
+    uint32_t countTo;
+    // номер канала таймера
+    static const uint8_t channel = PWM_HAL::Channel<Timer,Pin>().val;
+
+    void init (void)
+    {
+        Pin::Port::ClockEnable();
+        Pin::Configure ( Pin::Mode::AlternateMode,
+                         Pin::OutType::PushPull,
+                         Pin::OutSpeed::High,
+                         Pin::PullResistor::No);
+        Pin::template SetAltFunc <Timer::AltFunc> ();
+         
+        Timer::ClockEnable();
+        Timer::AutoReloadEnable();
+        Timer::template SetCompareMode <Timer::CompareMode::PWMmode, channel> ();
+        Timer::CounterEnable();
+    }
 };
 
 
@@ -80,35 +117,7 @@ public:
 ////////////////////////////////////////////////////
 
 
-template<> const uint8_t PWM<TIM2_t,PA0>::channel  = 1;
-template<> const uint8_t PWM<TIM2_t,PA1>::channel  = 2;
-template<> const uint8_t PWM<TIM2_t,PA2>::channel  = 3;
-template<> const uint8_t PWM<TIM2_t,PA3>::channel  = 4;
-template<> const uint8_t PWM<TIM2_t,PA5>::channel  = 1;
-template<> const uint8_t PWM<TIM2_t,PA15>::channel = 1;
-template<> const uint8_t PWM<TIM2_t,PB3>::channel  = 2;
-template<> const uint8_t PWM<TIM2_t,PB10>::channel = 3;
-template<> const uint8_t PWM<TIM2_t,PB11>::channel = 4;
 
-template<> const uint8_t PWM<TIM3_t,PA6>::channel  = 1;
-template<> const uint8_t PWM<TIM3_t,PA7>::channel  = 2;
-template<> const uint8_t PWM<TIM3_t,PB0>::channel  = 3;
-template<> const uint8_t PWM<TIM3_t,PB1>::channel  = 4;
-template<> const uint8_t PWM<TIM3_t,PB4>::channel  = 1;
-template<> const uint8_t PWM<TIM3_t,PB5>::channel  = 2;
-template<> const uint8_t PWM<TIM3_t,PC6>::channel  = 1;
-template<> const uint8_t PWM<TIM3_t,PC7>::channel  = 2;
-template<> const uint8_t PWM<TIM3_t,PC8>::channel  = 3;
-template<> const uint8_t PWM<TIM3_t,PC9>::channel  = 4;
-
-template<> const uint8_t PWM<TIM4_t,PB6>::channel  = 1;
-template<> const uint8_t PWM<TIM4_t,PB7>::channel  = 2;
-template<> const uint8_t PWM<TIM4_t,PB8>::channel  = 3;
-template<> const uint8_t PWM<TIM4_t,PB9>::channel  = 4;
-template<> const uint8_t PWM<TIM4_t,PD12>::channel = 1;
-template<> const uint8_t PWM<TIM4_t,PD13>::channel = 2;
-template<> const uint8_t PWM<TIM4_t,PD14>::channel = 3;
-template<> const uint8_t PWM<TIM4_t,PD15>::channel = 4;
 
 
 
