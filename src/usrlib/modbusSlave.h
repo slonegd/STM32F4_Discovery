@@ -12,56 +12,8 @@
 #pragma once
 
 #include "usart_hal.h"
-/*
-template <class InRegs_, class OutRegs_, class UART_>
-class MBslave
-{
-public:
-    static const uint16_t InRegQty  = static_cast<uint16_t>(InRegs_::Qty);
-    static const uint16_t OutRegQty = static_cast<uint16_t>(OutRegs_::Qty);
+#include "timers.h"
 
-    uint16_t inReg[InRegQty];
-    uint16_t outReg[OutRegQty];
-    uint16_t inRegMin[InRegQty];
-    uint16_t inRegMax[InRegQty];
-
-    UART_& uart;
-
-
-    MBslave(UART_& usart) : inReg{0}, outReg{0}, inRegMin{0}, inRegMax{0}, uart(usart), nInRegAction(InRegQty)
-    { }
-
-
-    // обрабатывает поступивший запрос, по необходимости формирует ответ
-    // переводит уарт на отправку или приём, если ответа не надо
-    inline void handler()
-    {
-
-    }
-
-
-    // перебирает все входные регистров, на которые пришел запрос
-    // внутри функции вызывать метод getInRegForAction для определения регистра
-    template <class function>
-    inline function foreachRegInActions (function f) 
-    {
-        for (; nInRegAction > nLastRegAction; nInRegAction++ ) {
-            f();
-        }
-        return f;
-    }
-
-
-    inline InRegs_ getInRegForAction() { return inRegAction; }
-     
-private:
-    union {
-        InRegs_  inRegAction;
-        uint16_t nInRegAction;
-    };
-    uint16_t nLastRegAction;
-};
-*/
 
 template <class InRegs_, class OutRegs_, class UART_>
 class MBslave
@@ -90,14 +42,38 @@ public:
     UART_& uart;
     
     
-    MBslave(UART_& usart) : arInRegs{0}, arOutRegs{0}, arInRegsMin{0},
-                            arInRegsMax{0}, uart(usart), 
-                            inRegAdrForAction(InRegQty)
+    
+    MBslave (
+        UART_& uart_,
+        Timer& timer_
+    ) : arInRegs{0}, arOutRegs{0}, arInRegsMin{0},arInRegsMax{0},
+        uart(uart_), timer(timer_),
+        inRegAdrForAction(InRegQty)
     { }
 
 
+
+    // вызываеться в прерывании idle по приёму
+    // запускает таймер определения конца пакета
+    inline void idleHandler()
+    {
+        uart.idleHandler();
+        timer.start();
+    }
+
+    // true когда пришло сообщение по модбасу, которое требует обработки
+    inline bool incomingMessage()
+    {
+        bool tmp = timer.done();
+        if (tmp) {
+            timer.stop();
+        }
+        return tmp;
+    }
+
     // обрабатывает поступивший запрос, по необходимости формирует ответ
-    // переводит уарт на отправку, если ответа не надо, то на приём
+    // если надо ответить, то переводит уарт на отправку зажигает индикатор
+    // если ответа не надо, то переводит уарт на приём
     inline void handler()
     {
 
@@ -114,13 +90,12 @@ public:
         }
         return f;
     }
-    inline uint16_t getInRegAdrForAction()
-    {
-        return inRegAdrForAction;
-    }
+    inline uint16_t getInRegAdrForAction() { return inRegAdrForAction; }
+
 
 
 private:
+    Timer& timer;
     uint16_t inRegAdrForAction;
     uint16_t lastInRegAdrForAction;
     

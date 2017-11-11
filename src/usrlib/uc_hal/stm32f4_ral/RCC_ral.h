@@ -100,11 +100,11 @@ namespace RCC_ral {
             AHBdiv512	= 0b1111
         };
         enum  APBprescaler {
-            APBnotdiv	= 0,
-            APBdiv2	= 0b100,
-            APBdiv4	= 0b101,
-            APBdiv8	= 0b110,
-            APBdiv16	= 0b111
+            APBnotdiv = 0,
+            APBdiv2	  = 0b100,
+            APBdiv4	  = 0b101,
+            APBdiv8	  = 0b110,
+            APBdiv16  = 0b111
         };
         enum  SystemClockSwitch {
             CS_HSI		= 0,
@@ -295,6 +295,8 @@ typedef struct
 } RCC_TypeDef;
 */
 
+extern const uint32_t fCPU;
+
 using namespace RCC_ral;
 
 class RCC_t : public RCC_ral::CR_t,
@@ -317,6 +319,11 @@ class RCC_t : public RCC_ral::CR_t,
               public APB2ENR_t
 {
 public:	
+    enum Bus {
+        APB1,
+        APB2
+    };
+
     static volatile RCC_ral::CR_t      &clockContr() { return (RCC_ral::CR_t &)      RCC->CR;      }
     static volatile RCC_ral::PLLCFGR_t &pllConf()    { return (RCC_ral::PLLCFGR_t &) RCC->PLLCFGR; }
     static volatile RCC_ral::CFGR_t    &conf()       { return (RCC_ral::CFGR_t &)    RCC->CFGR;    }
@@ -337,4 +344,22 @@ public:
     static inline void setAPB1prescaler (APBprescaler prescaler) { conf().bits.PPRE1 = prescaler; }
     static inline void setAPB2prescaler (APBprescaler prescaler) { conf().bits.PPRE2 = prescaler; }
     static inline void systemClockSwitch (SystemClockSwitch sw) { conf().bits.SW = sw; }
+    static inline uint32_t getAPB1clock() 
+    {
+        uint8_t tmp8 = conf().bits.PPRE1;
+        if (tmp8 == 0) {
+            return fCPU;
+        } else {
+            return fCPU >> (tmp8 - 3);
+        }
+    }
+    static inline uint32_t getAPB2clock()
+    {
+        uint8_t tmp8 = conf().bits.PPRE2;
+        if (tmp8 == 0) {
+            return fCPU;
+        } else {
+            return fCPU >> (tmp8 - 3);
+        }
+    }
 };

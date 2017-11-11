@@ -134,6 +134,7 @@ public:
     using DataDirection = DMA_ral::CR_t::DataDirection;
     using DataSize = DMA_ral::CR_t::DataSize;
     using Channels = DMA_ral::CR_t::Channels;
+
     static inline void Enable()  { conf().bits.EN = true; }
     static inline void Disable() { conf().bits.EN = false; }
     static inline void SetMemoryAdr (uint32_t val) { memAdr0().reg = val; }

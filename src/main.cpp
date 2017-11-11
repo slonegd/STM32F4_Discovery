@@ -10,7 +10,7 @@ int main(void)
     CLKinit ();
     PortsInit ();
 
-    // eeprom
+    // энергонезависимые данные
     if ( !flash.readFromFlash() ) {
         flash.data.d1 = 1;
         flash.data.d2 = 3;
@@ -45,7 +45,7 @@ int main(void)
     {
         timers.update();
 
-        if ( modbus.uart.rxComplete() ) {
+        if ( modbus.incomingMessage() ) {
             modbus.handler();
             modbus.foreachRegForActions (mbRegInAction);
         }
@@ -87,7 +87,17 @@ int main(void)
 //////////////////////////////////////////////////////////////////////////////
 //       ПРЕРЫВАНИЯ
 //////////////////////////////////////////////////////////////////////////////
-extern "C" void SysTick_Handler (void)
+extern "C" void SysTick_Handler()
 {
     timers.tick();
+}
+
+extern "C" void USART1_IRQHandler()
+{
+    modbus.idleHandler();
+}
+
+extern "C" void DMA1_Stream7_IRQHandler()
+{
+    modbus.uart.txCompleteHandler();
 }

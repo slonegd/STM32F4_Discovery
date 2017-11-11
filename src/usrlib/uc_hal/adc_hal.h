@@ -131,7 +131,7 @@ public:
 private:
     uint16_t buf[bufSize];
     static const Channels channel = Channel<ADC_,DMA_>().val;
-    static const int8_t adcin = AdcIn<ADC_,PIN>().val;
+    static const int8_t adcIn = AdcIn<ADC_,PIN>().val;
     
 };
 

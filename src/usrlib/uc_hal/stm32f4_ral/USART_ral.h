@@ -230,7 +230,8 @@ struct USART_t : public USART_ral::SR_t,
 extern const uint32_t fCPU;
 
 // ClkEnOffset оффсет для регистра из структуры RCC, разрешающий тактирование 
-template <uint32_t USARTptr, class DMAstreamRX, class DMAstreamTX, uint32_t ClkEnOffset, uint32_t ClkEnMask>
+template <uint32_t USARTptr, class DMAstreamRX, class DMAstreamTX, DMA_ral::CR_t::Channels DMAChannel_,
+          uint32_t ClkEnOffset, uint32_t ClkEnMask, RCC_t::Bus Bus_>
 class USARTx : USART_t
 {
 public:
@@ -248,16 +249,11 @@ public:
     using StopBits = CR2_t::StopBits;
     using DMArx = DMAstreamRX;
     using DMAtx = DMAstreamTX;
+    using Channels = DMA_ral::CR_t::Channels;
 
-protected:
-    static volatile USART_ral::SR_t   &status()   { return (USART_ral::SR_t &)   (*(USART_TypeDef*)USARTptr).SR;   }
-    static volatile USART_ral::DR_t   &data()   { return (USART_ral::DR_t &)   (*(USART_TypeDef*)USARTptr).DR;   }
-    static volatile USART_ral::BRR_t  &boudrate()  { return (USART_ral::BRR_t &)  (*(USART_TypeDef*)USARTptr).BRR;  }
-    static volatile USART_ral::CR1_t  &conf1()  { return (USART_ral::CR1_t &)  (*(USART_TypeDef*)USARTptr).CR1;  }
-    static volatile USART_ral::CR2_t  &conf2()  { return (USART_ral::CR2_t &)  (*(USART_TypeDef*)USARTptr).CR2;  }
-    static volatile USART_ral::CR3_t  &conf3()  { return (USART_ral::CR3_t &)  (*(USART_TypeDef*)USARTptr).CR3;  }
-    static volatile USART_ral::GTPR_t &gtp() { return (USART_ral::GTPR_t &) (*(USART_TypeDef*)USARTptr).GTPR; }
-public:
+    static const Channels DMAChannel = DMAChannel_;
+    static const RCC_t::Bus bus = Bus_;
+
     static inline void ClockEnable()                { *((uint32_t*)(RCC_BASE + ClkEnOffset)) |= ClkEnMask; }
     static inline void Enable()                     { conf1().bits.UE = true; }
     static inline void Disable()                    { conf1().bits.UE = false; }
@@ -267,14 +263,50 @@ public:
     static inline void TXdisable()                  { conf1().bits.TE = false; }
     static inline void DMAtxEnable()                { conf3().bits.DMAT = true; }
     static inline void DMArxEnable()                { conf3().bits.DMAR = true; }
-    static inline void SetBoudRate (Boudrate brval) { boudrate().reg = fCPU / brval; }
+    static inline void SetBoudRate (Boudrate brval)
+    {
+        if (bus == RCC_t::Bus::APB1) {
+            boudrate().reg = RCC_t::getAPB1clock() / brval; 
+        } else if (bus == RCC_t::Bus::APB2) {
+            boudrate().reg = RCC_t::getAPB2clock() / brval; 
+        }
+    }
     static inline void ParityEnable ()              { conf1().bits.PCE = true; }
     static inline void ParityDisable ()             { conf1().bits.PCE = false; }
     static inline void SetParity (Parity p)         { conf1().bits.PS = p; }
     static inline void SetStopBits (StopBits sb)    { conf2().bits.STOP = sb; }
+
+protected:
+    static volatile USART_ral::SR_t   &status()   { return (USART_ral::SR_t &)   (*(USART_TypeDef*)USARTptr).SR;   }
+    static volatile USART_ral::DR_t   &data()     { return (USART_ral::DR_t &)   (*(USART_TypeDef*)USARTptr).DR;   }
+    static volatile USART_ral::BRR_t  &boudrate() { return (USART_ral::BRR_t &)  (*(USART_TypeDef*)USARTptr).BRR;  }
+    static volatile USART_ral::CR1_t  &conf1()    { return (USART_ral::CR1_t &)  (*(USART_TypeDef*)USARTptr).CR1;  }
+    static volatile USART_ral::CR2_t  &conf2()    { return (USART_ral::CR2_t &)  (*(USART_TypeDef*)USARTptr).CR2;  }
+    static volatile USART_ral::CR3_t  &conf3()    { return (USART_ral::CR3_t &)  (*(USART_TypeDef*)USARTptr).CR3;  }
+    static volatile USART_ral::GTPR_t &gtp()      { return (USART_ral::GTPR_t &) (*(USART_TypeDef*)USARTptr).GTPR; }
 };
 
-using USART1_t = USARTx<USART1_BASE, DMA2stream5, DMA2stream7, RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART1EN_Msk>;
-using USART2_t = USARTx<USART2_BASE, DMA1stream5, DMA1stream6, RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_USART2EN_Msk>;
-using USART3_t = USARTx<USART3_BASE, DMA1stream1, DMA1stream3, RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_USART3EN_Msk>;
-using USART6_t = USARTx<USART6_BASE, DMA2stream1, DMA2stream2, RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART6EN_Msk>;
+using USART1_t      = USARTx<USART1_BASE, DMA2stream5, DMA2stream7, DMA_ral::CR_t::Channels::_4,
+                      RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART1EN_Msk, RCC_t::Bus::APB2>;
+// альтернатива с другим потоком дма
+using USART1alt_t   = USARTx<USART1_BASE, DMA2stream2, DMA2stream7, DMA_ral::CR_t::Channels::_4,
+                      RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART1EN_Msk, RCC_t::Bus::APB2>;
+
+using USART2_t      = USARTx<USART2_BASE, DMA1stream5, DMA1stream6, DMA_ral::CR_t::Channels::_4,
+                      RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_USART2EN_Msk, RCC_t::Bus::APB1>;
+
+using USART3_t      = USARTx<USART3_BASE, DMA1stream1, DMA1stream3 ,DMA_ral::CR_t::Channels::_4,
+                      RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_USART3EN_Msk, RCC_t::Bus::APB1>;
+// альтернатива с другим потоком дма
+using USART3alt_t   = USARTx<USART3_BASE, DMA1stream1, DMA1stream4, DMA_ral::CR_t::Channels::_4,
+                      RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_USART3EN_Msk, RCC_t::Bus::APB1>;
+
+using USART6_t      = USARTx<USART6_BASE, DMA2stream1, DMA2stream6, DMA_ral::CR_t::Channels::_5,
+                      RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART6EN_Msk, RCC_t::Bus::APB2>;
+// альтернативы с другим потоком дма
+using USART6alt17_t = USARTx<USART6_BASE, DMA2stream1, DMA2stream7, DMA_ral::CR_t::Channels::_5,
+                      RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART6EN_Msk, RCC_t::Bus::APB2>;
+using USART6alt27_t = USARTx<USART6_BASE, DMA2stream2, DMA2stream7, DMA_ral::CR_t::Channels::_5,
+                      RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART6EN_Msk, RCC_t::Bus::APB2>;
+using USART6alt26_t = USARTx<USART6_BASE, DMA2stream2, DMA2stream6, DMA_ral::CR_t::Channels::_5,
+                      RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART6EN_Msk, RCC_t::Bus::APB2>;

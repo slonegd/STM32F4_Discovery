@@ -2,31 +2,66 @@
 
 #include <stdint.h>
 #include "defines.h"
+#include "DebugVar.h"
+#include "RCC_ral.h"
+#include "pin_hal.h"
+#include "flash_hal.h"
+#include "pwm_hal.h"
+#include "flash_hal.h"
+#include "adc_hal.h"
 #include "timers.h"
+#include "pinlist.h"
+#include "modbusSlave.h"
 
+
+// discoveri 
+using LedPort = PD;
+using Bled = PD15;
+using Rled = PD14;
+using Oled = PD13;
+using Gled = PD12;
+using Leds = PinList<Bled, Oled>;
+using Button = PA0;
 
 // программные таймеры
-const uint8_t timersQty = 2;
+const uint8_t timersQty = 3;
 Timers<timersQty> timers;
 auto& ledTimer = timers.all[0];
 auto& butTimer = timers.all[1];
+auto& mbTimer  = timers.all[2];
 
 // энергонезависимые данные
+struct FlashData {
+    uint16_t d1;
+    uint16_t d2;
+};
 const uint8_t flashSector = 2;
 Flash<FlashData, flashSector> flash;
 
 // шим
+using PWMout = Rled;
+using PWMtimer = TIM4_t;
 PWM<PWMtimer, PWMout> pwm;
 
 // уарт модбаса
+using RXpin = PA3;
+using TXpin = PA2;
+using RTSpin = PA5;
+using LEDpin = Gled;
 const uint8_t bufSize = 30;
-using USART_ = USART<USART1_t, bufSize, RXpin, TXpin, RTSpin>;
+using USART_ = USART<USART1_t, bufSize, RXpin, TXpin, RTSpin, LEDpin>;
 USART_ uart;
 
 // модбас
-using Modbus = MBslave<InRegs, OutRegs, USART_>;
-auto modbus = Modbus(uart);
-
+struct InRegs {
+    uint16_t reg0;
+    uint16_t reg1;
+};
+struct OutRegs {
+    uint16_t reg0;
+    uint16_t reg1;
+};
+auto modbus = MBslave<InRegs, OutRegs, USART_> (uart, mbTimer);
 // действия на входные регистры модбаса
 #define ADR(reg)    GET_ADR(InRegs, reg)
 inline void mbRegInAction ()

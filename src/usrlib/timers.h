@@ -27,7 +27,7 @@ struct Timer
         enable = true;
     }
     // возвращает true, если таймер натикал и перезапускает его
-    inline bool event (void)
+    inline bool event()
     {
         if (counted) {
             counted = false;
@@ -37,9 +37,15 @@ struct Timer
             return (false);
         }
     }
-    inline void stop (void)
+    // возвращает true, если таймер натикал и НЕ перезапускает его
+    inline bool done()   { return counted; }
+    inline void pause()  { enable = false; }
+    inline void start()  { enable = true;  }
+    inline void stop()
     {
-        enable = false;
+        counted = false;
+        enable = false; 
+        timePassed = 0;
     }
 };
 
