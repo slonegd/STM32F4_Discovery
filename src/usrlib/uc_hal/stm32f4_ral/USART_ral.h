@@ -9,7 +9,7 @@
 namespace USART_ral {
 
     struct SR_t {
-        static const uint8_t Offset = 0x00;
+        enum { Offset = 0x00 };
         struct Bits {
             // Bit 0 PE: Parity error
             volatile bool PE    :1;
@@ -32,7 +32,7 @@ namespace USART_ral {
             // Bit 9 CTS: CTS flag
             volatile bool CTS   :1;
             // Bits 31:10 Reserved, must be kept at reset value
-            volatile uint32_t dcb1  :26;
+            volatile uint32_t dcb1  :22;
         };
         union {
             volatile Bits bits;
@@ -41,21 +41,21 @@ namespace USART_ral {
     };
 
     struct DR_t {
-        static const uint8_t Offset = 0x04;
+        enum { Offset = 0x04 };
         union {
             volatile uint32_t reg;
         };
     };
 
     struct BRR_t {
-        static const uint8_t Offset = 0x08;
+        enum { Offset = 0x08 };
         union {
             volatile uint32_t reg;
         };
     };
 
     struct CR1_t {
-        static const uint8_t Offset = 0x0C;
+        enum { Offset = 0x0C };
         enum Parity {
             even = 0,
             odd  = 1
@@ -108,6 +108,10 @@ namespace USART_ral {
             // Bits 31:16 Reserved, must be kept at reset value
             volatile uint32_t dcb2      :16;
         };
+        enum {
+            SBK = 0, RWU, RE, TE, IDLEIE, RXNEIE, TCIE, TXEIE, PEIE,
+            PS, PCE, WAKE, M, UE, OVER8 = 15
+        };
         union {
             volatile Bits bits;
             volatile uint32_t reg;
@@ -115,7 +119,7 @@ namespace USART_ral {
     };
 
     struct CR2_t {
-        static const uint8_t Offset = 0x10;
+        enum { Offset = 0x10 };
         enum BreakDetection {
             _10bit = 0,
             _11bit = 1
@@ -159,7 +163,7 @@ namespace USART_ral {
     };
 
     struct CR3_t {
-        static const uint8_t Offset = 0x14;
+        enum { Offset = 0x14 };
         struct Bits {
             // Bit 0 EIE: Error interrupt enable
             volatile bool EIE           :1;
@@ -194,7 +198,7 @@ namespace USART_ral {
         };
     };
     struct GTPR_t {
-        static const uint8_t Offset = 0x18;
+        enum { Offset = 0x18 };
         union {
             volatile uint32_t reg;
         };
@@ -253,37 +257,59 @@ public:
 
     static const Channels DMAChannel = DMAChannel_;
     static const RCC_t::Bus bus = Bus_;
+    static constexpr IRQn_Type IRQn = 
+        USARTptr == USART1_BASE ? USART1_IRQn :
+        USARTptr == USART2_BASE ? USART2_IRQn :
+        USARTptr == USART3_BASE ? USART3_IRQn :
+        USARTptr == USART6_BASE ? USART6_IRQn :
+                                  NonMaskableInt_IRQn;
 
-    static inline void ClockEnable()                { *((uint32_t*)(RCC_BASE + ClkEnOffset)) |= ClkEnMask; }
-    static inline void Enable()                     { conf1().bits.UE = true; }
-    static inline void Disable()                    { conf1().bits.UE = false; }
-    static inline void RXenable()                   { conf1().bits.RE = true; }
-    static inline void RXdisable()                  { conf1().bits.RE = false; }
-    static inline void TXenable()                   { conf1().bits.TE = true; }
-    static inline void TXdisable()                  { conf1().bits.TE = false; }
-    static inline void DMAtxEnable()                { conf3().bits.DMAT = true; }
-    static inline void DMArxEnable()                { conf3().bits.DMAR = true; }
-    static inline void SetBoudRate (Boudrate brval)
+
+    static void ClockEnable() { *((uint32_t*)(RCC_BASE + ClkEnOffset)) |= ClkEnMask; }
+    static void Enable (bool val)      { conf1().bits.UE = val; }
+    static void RXenable (bool val)    { 
+        //conf1().bits.RE = val; 
+        conf1().reg |= (uint32_t)val << RE;
+        //USART1->CR1 |= USART_CR1_RE_Msk;
+    }
+    static void TXenable (bool val)    { conf1().bits.TE = val; }
+    static void DMAtxEnable() { conf3().bits.DMAT = true; }
+    static void DMArxEnable() { conf3().bits.DMAR = true; }
+    static void SetBoudRate (Boudrate val)
     {
         if (bus == RCC_t::Bus::APB1) {
-            boudrate().reg = RCC_t::getAPB1clock() / brval; 
+            boudrate().reg = RCC_t::getAPB1clock() / val;
         } else if (bus == RCC_t::Bus::APB2) {
-            boudrate().reg = RCC_t::getAPB2clock() / brval; 
+            boudrate().reg = RCC_t::getAPB2clock() / val;
         }
     }
-    static inline void ParityEnable ()              { conf1().bits.PCE = true; }
-    static inline void ParityDisable ()             { conf1().bits.PCE = false; }
-    static inline void SetParity (Parity p)         { conf1().bits.PS = p; }
-    static inline void SetStopBits (StopBits sb)    { conf2().bits.STOP = sb; }
+    static void ParityEnable (bool val)    { conf1().bits.PCE = val; }
+    static void SetParity (Parity val)     { conf1().bits.PS = val; }
+    static void SetStopBits (StopBits val) { conf2().bits.STOP = val; }
+    static void EnableIDLEinterrupt()      { conf1().bits.IDLEIE = true; }
+    static bool IDLEinterrupt()            { return status().bits.IDLE; }
+    static void ClearIDLEinterruptFlag()
+    {
+        status().reg;
+        data().reg;
+    }
+
 
 protected:
-    static volatile USART_ral::SR_t   &status()   { return (USART_ral::SR_t &)   (*(USART_TypeDef*)USARTptr).SR;   }
-    static volatile USART_ral::DR_t   &data()     { return (USART_ral::DR_t &)   (*(USART_TypeDef*)USARTptr).DR;   }
-    static volatile USART_ral::BRR_t  &boudrate() { return (USART_ral::BRR_t &)  (*(USART_TypeDef*)USARTptr).BRR;  }
-    static volatile USART_ral::CR1_t  &conf1()    { return (USART_ral::CR1_t &)  (*(USART_TypeDef*)USARTptr).CR1;  }
-    static volatile USART_ral::CR2_t  &conf2()    { return (USART_ral::CR2_t &)  (*(USART_TypeDef*)USARTptr).CR2;  }
-    static volatile USART_ral::CR3_t  &conf3()    { return (USART_ral::CR3_t &)  (*(USART_TypeDef*)USARTptr).CR3;  }
-    static volatile USART_ral::GTPR_t &gtp()      { return (USART_ral::GTPR_t &) (*(USART_TypeDef*)USARTptr).GTPR; }
+    static volatile USART_ral::SR_t   &status()  
+    { return (USART_ral::SR_t &)   (*(USART_TypeDef*)USARTptr).SR;   }
+    static volatile USART_ral::DR_t   &data()     
+    { return (USART_ral::DR_t &)   (*(USART_TypeDef*)USARTptr).DR;   }
+    static volatile USART_ral::BRR_t  &boudrate() 
+    { return (USART_ral::BRR_t &)  (*(USART_TypeDef*)USARTptr).BRR;  }
+    static volatile USART_ral::CR1_t  &conf1()    
+    { return (USART_ral::CR1_t &)  (*(USART_TypeDef*)USARTptr).CR1;  }
+    static volatile USART_ral::CR2_t  &conf2()    
+    { return (USART_ral::CR2_t &)  (*(USART_TypeDef*)USARTptr).CR2;  }
+    static volatile USART_ral::CR3_t  &conf3()    
+    { return (USART_ral::CR3_t &)  (*(USART_TypeDef*)USARTptr).CR3;  }
+    static volatile USART_ral::GTPR_t &gtp()      
+    { return (USART_ral::GTPR_t &) (*(USART_TypeDef*)USARTptr).GTPR; }
 };
 
 using USART1_t      = USARTx<USART1_BASE, DMA2stream5, DMA2stream7, DMA_ral::CR_t::Channels::_4,

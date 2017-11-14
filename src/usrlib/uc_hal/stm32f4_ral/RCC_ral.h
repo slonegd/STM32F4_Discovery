@@ -324,42 +324,77 @@ public:
         APB2
     };
 
+    static void HSEon()        { clockContr().bits.HSEON = 1; }
+    static void waitHSEready() { while (!clockContr().bits.HSERDY) { } }
+    static void PLLon()        { clockContr().bits.PLLON = 1; }
+    static void waitPLLready() { while (!clockContr().bits.PLLRDY) { } }
+    static void setPLLP (PLLPdiv val)  { pllConf().bits.PLLP = val; }
+
+    template <uint8_t val> static void setPLLM()  
+    {
+        static_assert (
+            val >= 2 && val <= 63,
+            "значение множителя должно быть в диапазоне 2-63"
+        );
+        pllConf().bits.PLLM = val; 
+    }
+
+    static void setPLLM (uint16_t val) 
+    {
+        if (val >= 2 && val <= 63)
+            pllConf().bits.PLLM = val;
+    }
+
+    template <uint16_t val> static void setPLLN()  
+    {
+        static_assert (
+            val >= 50 && val <= 432,
+            "значение множителя должно быть в диапазоне 50-432"
+        );
+        pllConf().bits.PLLN = val; 
+    }
+
+    static void setPLLN (uint16_t val) 
+    {
+        if (val >= 50 && val <= 432)
+            pllConf().bits.PLLN = val; 
+    }
+
+    template <uint8_t val> static void setPLLQ()  
+    {
+        static_assert (
+            val >= 2 && val <= 15,
+            "значение множителя должно быть в диапазоне 2-15"
+        );
+        pllConf().bits.PLLQ = val; 
+    }
+
+    static void setPLLQ (uint8_t val)
+    {
+        if (val >= 2 && val <= 15)
+            pllConf().bits.PLLQ = val;
+    }
+
+    static void setPLLsource (PLLsource val) { pllConf().bits.PLLSRC = val; }
+    static void setAHBprescaler (AHBprescaler val) { conf().bits.HPRE = val; }
+    static void setAPB1prescaler (APBprescaler val) { conf().bits.PPRE1 = val; }
+    static void setAPB2prescaler (APBprescaler val) { conf().bits.PPRE2 = val; }
+    static void systemClockSwitch (SystemClockSwitch val) { conf().bits.SW = val; }
+    static uint32_t getAPB1clock() { return getAPBclock (conf().bits.PPRE1); }
+    static uint32_t getAPB2clock() { return getAPBclock (conf().bits.PPRE2); }
+
+protected:
     static volatile RCC_ral::CR_t      &clockContr() { return (RCC_ral::CR_t &)      RCC->CR;      }
     static volatile RCC_ral::PLLCFGR_t &pllConf()    { return (RCC_ral::PLLCFGR_t &) RCC->PLLCFGR; }
     static volatile RCC_ral::CFGR_t    &conf()       { return (RCC_ral::CFGR_t &)    RCC->CFGR;    }
 
-    static inline void HSEon (void) { clockContr().bits.HSEON = 1; }
-    static inline void waitHSEready (void) { while (!clockContr().bits.HSERDY) { } }
-    static inline void PLLon (void) { clockContr().bits.PLLON = 1; }
-    static inline void waitPLLready (void) { while (!clockContr().bits.PLLRDY) { } }
-    static inline void setPLLP (PLLPdiv div) { pllConf().bits.PLLP = div; }
-    // 2 ≤ var ≤ 63
-    static inline void setPLLM (uint8_t var) { pllConf().bits.PLLM = var; }
-    // 50 ≤ var ≤ 432
-    static inline void setPLLN (uint16_t var) { pllConf().bits.PLLN = var; }
-    // 2 ≤ var ≤ 15
-    static inline void setPLLQ (uint8_t var) { pllConf().bits.PLLQ = var; }
-    static inline void setPLLsource (PLLsource source) { pllConf().bits.PLLSRC = source; }
-    static inline void setAHBprescaler (AHBprescaler prescaler) { conf().bits.HPRE = prescaler; }
-    static inline void setAPB1prescaler (APBprescaler prescaler) { conf().bits.PPRE1 = prescaler; }
-    static inline void setAPB2prescaler (APBprescaler prescaler) { conf().bits.PPRE2 = prescaler; }
-    static inline void systemClockSwitch (SystemClockSwitch sw) { conf().bits.SW = sw; }
-    static inline uint32_t getAPB1clock() 
+private:
+    static inline uint32_t getAPBclock(APBprescaler val)
     {
-        uint8_t tmp8 = conf().bits.PPRE1;
-        if (tmp8 == 0) {
-            return fCPU;
-        } else {
-            return fCPU >> (tmp8 - 3);
-        }
-    }
-    static inline uint32_t getAPB2clock()
-    {
-        uint8_t tmp8 = conf().bits.PPRE2;
-        if (tmp8 == 0) {
-            return fCPU;
-        } else {
-            return fCPU >> (tmp8 - 3);
-        }
-    }
+        return val == APBprescaler::APBnotdiv ? fCPU     :
+               val == APBprescaler::APBdiv2   ? fCPU / 2 :
+               val == APBprescaler::APBdiv4   ? fCPU / 4 :
+               val == APBprescaler::APBdiv8   ? fCPU / 8 :
+                                                fCPU / 16;
+    } 
 };

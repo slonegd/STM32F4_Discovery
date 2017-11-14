@@ -25,10 +25,7 @@ public:
     volatile uint8_t Buffer[bufSize];
 
     using Boudrate = typename USART_::Boudrate;
-    enum ParityEn {
-        disable,
-        enable
-    };
+    enum ParityEn { disable, enable };
     using Parity = typename USART_::Parity;
     using StopBits = typename USART_::StopBits;
     struct Settings {
@@ -46,24 +43,40 @@ public:
         DMArx::SetQtyTransactions (bufSize);
         DMArx::Enable(); 
     }
-    inline void disableRX()     { DMArx::Disable(); }
-    inline bool rxComplete()    { return fRXcomplete; }
+    inline void disableRx()     { DMArx::Disable(); }
     inline uint32_t byteQtyRX() { return bufSize - DMArx::QtyTransactionsLeft(); }
     inline void startTX (uint32_t qty)
     {
         DMAtx::SetQtyTransactions (qty);
         DMAtx::Enable();
+        LED::Set();
     }
-    inline void stopTX() { DMAtx::Disnable(); }
+    inline void stopTX() { DMAtx::Disable(); }
     inline bool isCompleteTX()  { return false; }
     // обработчики прерываний
-    inline void idleHandler() {}
+    // возвращает true если источник прерывания наш
+    // тут возможно надо будет дораьотать, потому что
+    // метод сбрасывает все флаги прерывания,
+    // но в этом приложении пофиг
+    inline bool idleHandler()
+    {
+        bool tmp = USART_::IDLEinterrupt();
+        if (tmp) {
+           disableRx();
+           USART_::ClearIDLEinterruptFlag();
+        }
+        return tmp;
+    }
     inline void txCompleteHandler()
     {
-        LED::Clear();
+        if ( DMAtx::TransferCompleteInterrupt() ) {
+            stopTX();
+            LED::Clear();
+            enableRX();
+        }
     }
 private:
-    bool fRXcomplete;
+
 };
 
 template <class USART_, uint32_t bufSize, class RX, class TX, class RTS, class LED>
@@ -79,6 +92,7 @@ void USART<USART_, bufSize, RX, TX, RTS, LED>::init (Settings set)
     );
     RX::template SetAltFunc <PA1::AF::AF7> ();
 
+    TX::Port::ClockEnable();
     TX::Configure (
         TX::Mode::AlternateMode,
         TX::OutType::PushPull,
@@ -87,6 +101,7 @@ void USART<USART_, bufSize, RX, TX, RTS, LED>::init (Settings set)
     );
     TX::template SetAltFunc <PA1::AF::AF7> ();
 
+    RTS::Port::ClockEnable();
     RTS::Configure (
         RTS::Mode::AlternateMode,
         RTS::OutType::PushPull,
@@ -95,6 +110,7 @@ void USART<USART_, bufSize, RX, TX, RTS, LED>::init (Settings set)
     );
     RTS::template SetAltFunc <PA1::AF::AF7> ();
 
+    LED::Port::ClockEnable();
     LED::Configure (
         LED::Mode::OutputMode,
         LED::OutType::PushPull,
@@ -107,19 +123,23 @@ void USART<USART_, bufSize, RX, TX, RTS, LED>::init (Settings set)
     USART_::ClockEnable();
     USART_::SetBoudRate (set.boudrate);
     if (set.parityEn == ParityEn::enable) {
-        USART_::ParityEnable();
+        USART_::ParityEnable (true);
         USART_::SetParity(set.parity);
     } else {
-        USART_::ParityDisable();
+        USART_::ParityEnable (false);
     }
     USART_::SetStopBits (set.stopBits);
-    USART_::RXenable();
-    USART_::TXenable();
+//    USART1->CR1 |= USART_CR1_RE_Msk;
+//    USART1->CR1 |= USART_CR1_TE_Msk;
+    USART_::RXenable (true);
+    USART_::TXenable (true);
     USART_::DMArxEnable();
     USART_::DMAtxEnable();
-    USART_::Enable();
+//    USART1->CR1 |= USART_CR1_UE_Msk;
+    USART_::Enable (true);
 
-    // дма
+/*    // дма
+    DMArx::ClockEnable();
     DMArx::SetMemoryAdr ( (uint32_t) this );
     DMArx::SetPeriphAdr ( (uint32_t) &(USART_::data()) );
     DMArx::SetDirection (DMArx::DataDirection::PerToMem);
@@ -138,13 +158,14 @@ void USART<USART_, bufSize, RX, TX, RTS, LED>::init (Settings set)
     DMAtx::SetPeriphTransactionSize (DMAtx::DataSize::byte8);
     DMAtx::SetMemoryInc (true);
     DMAtx::SetPeriphInc (false);
-    DMAtx::SetCircularMode (true);
-    DMArx::SetChannel (USART_::DMAChannel);
+    DMAtx::SetCircularMode (false);
+    DMAtx::SetChannel (USART_::DMAChannel);
 
     // прерывания
-    // включить идле + добавить таймер в модбас
-    // включить конец посылки
-
+    USART_::EnableIDLEinterrupt();
+    NVIC_EnableIRQ(USART_::IRQn);
+    DMAtx::EnableTransferCompleteInterrupt();
+    NVIC_EnableIRQ(DMAtx::IRQn);*/
 }
 
 

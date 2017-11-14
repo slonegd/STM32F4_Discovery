@@ -39,6 +39,7 @@ int main(void)
     // инициализация программных таймеров задач
     ledTimer.setTimeAndStart (500);
     butTimer.setTimeAndStart (200);
+    txTimer.setTimeAndStart  (100);
 
    
     while (1)
@@ -50,9 +51,12 @@ int main(void)
             modbus.foreachRegForActions (mbRegInAction);
         }
 
-        if ( ledTimer.event() ) {
+        if ( txTimer.event() )
+            modbus.uart.startTX (5);
+
+
+        if ( ledTimer.event() )
             Leds::Write(i++);
-        }
 
         if ( butTimer.event() ) {
             flash.update();

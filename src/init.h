@@ -24,11 +24,12 @@ using Leds = PinList<Bled, Oled>;
 using Button = PA0;
 
 // программные таймеры
-const uint8_t timersQty = 3;
+const uint8_t timersQty = 4;
 Timers<timersQty> timers;
 auto& ledTimer = timers.all[0];
 auto& butTimer = timers.all[1];
 auto& mbTimer  = timers.all[2];
+auto& txTimer  = timers.all[3];
 
 // энергонезависимые данные
 struct FlashData {
@@ -82,19 +83,19 @@ inline void mbRegInAction ()
 inline void CLKinit (void)
 {
     FLASH_t::SetLatency (FLASH_t::Latency::latency_5);
-    RCC_t::HSEon ();
-    RCC_t::waitHSEready ();
+    RCC_t::HSEon();
+    RCC_t::waitHSEready();
     RCC_t::setAHBprescaler (RCC_t::AHBprescaler::AHBnotdiv);
     RCC_t::setAPB1prescaler (RCC_t::APBprescaler::APBdiv4);
     RCC_t::setAPB2prescaler (RCC_t::APBprescaler::APBdiv2);
     RCC_t::systemClockSwitch (RCC_t::SystemClockSwitch::CS_PLL);
-    RCC_t::setPLLM (4);
-    RCC_t::setPLLN (168);
+    RCC_t::setPLLM<4>();
+    RCC_t::setPLLN<168>();
     RCC_t::setPLLP (RCC_t::PLLPdiv::PLLdiv2);
-//  RCC_t::setPLLQ (4);
+//  RCC_t::setPLLQ<4>();
     RCC_t::setPLLsource (RCC_t::PLLsource::sHSE);
-    RCC_t::PLLon ();
-    RCC_t::waitPLLready ();
+    RCC_t::PLLon();
+    RCC_t::waitPLLready();
 }
 
 

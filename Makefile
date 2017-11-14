@@ -69,8 +69,8 @@ PERIFLIB_SOURCES =
 #######################################
 # binaries
 #######################################
-#PREFIX = arm-none-eabi-
-PREFIX = /home/slonegd/Code/gcc-arm-none-eabi-6-2017-q2-update/bin/arm-none-eabi-
+PREFIX = arm-none-eabi-
+#PREFIX = /home/slonegd/Code/gcc-arm-none-eabi-6-2017-q2-update/bin/arm-none-eabi-
 #PREFIX = /home/dvk/code/gcc-arm-none-eabi-6-2017-q1-update/bin/arm-none-eabi-
 
 CPP = $(PREFIX)g++
@@ -188,12 +188,13 @@ clean:
 	-rm -fR .dep $(BUILD_DIR)
 
 flash_stlink:
-#	/home/dvk/code/stlink/build/Release/st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
+	/home/dvk/code/stlink/build/Release/st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
 #	/home/slonegd/Code/stlink/build/Release/st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
-	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
+#	st-flash write $(BUILD_DIR)/$(TARGET).bin 0x8000000
 
 util:
-	/home/slonegd/Code/stlink/build/Release/src/gdbserver/st-util
+	/home/dvk/code/stlink/build/Release/src/gdbserver/st-util
+#	/home/slonegd/Code/stlink/build/Release/src/gdbserver/st-util
 
 debug: clean all flash_stlink util
   

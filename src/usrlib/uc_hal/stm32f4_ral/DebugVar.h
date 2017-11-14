@@ -42,6 +42,8 @@ volatile DMAstream_t* DMA2Stream4_d = (DMAstream_t*) DMA2_Stream4;
 volatile DMAstream_t* DMA2Stream5_d = (DMAstream_t*) DMA2_Stream5;
 volatile DMAstream_t* DMA2Stream6_d = (DMAstream_t*) DMA2_Stream6;
 volatile DMAstream_t* DMA2Stream7_d = (DMAstream_t*) DMA2_Stream7;
+//volatile DMA_t* DMA1_d = (DMA_t*) DMA1;
+//volatile DMA_t* DMA2_d = (DMA_t*) DMA2;
 
 
 inline void makeDebugVar (void)
@@ -80,5 +82,7 @@ inline void makeDebugVar (void)
     DMA2Stream5_d->CR_t::bits.dcb1 = 0;
     DMA2Stream6_d->CR_t::bits.dcb1 = 0;
     DMA2Stream7_d->CR_t::bits.dcb1 = 0;
+//    DMA1_d->LIFCR_t::bits.dcb1 = 0;
+//    DMA2_d->LIFCR_t::bits.dcb1 = 0;
 
 }

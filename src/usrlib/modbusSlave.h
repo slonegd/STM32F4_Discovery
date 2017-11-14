@@ -57,17 +57,16 @@ public:
     // запускает таймер определения конца пакета
     inline void idleHandler()
     {
-        uart.idleHandler();
-        timer.start();
+        if ( uart.idleHandler() )
+            timer.start();
     }
 
     // true когда пришло сообщение по модбасу, которое требует обработки
     inline bool incomingMessage()
     {
         bool tmp = timer.done();
-        if (tmp) {
+        if (tmp)
             timer.stop();
-        }
         return tmp;
     }
 
@@ -85,9 +84,8 @@ public:
     template <class function>
     inline function foreachRegForActions (function f) 
     {
-        for (; inRegAdrForAction <= lastInRegAdrForAction; ++inRegAdrForAction ) {
+        for (; inRegAdrForAction <= lastInRegAdrForAction; ++inRegAdrForAction ) 
             f();
-        }
         return f;
     }
     inline uint16_t getInRegAdrForAction() { return inRegAdrForAction; }
