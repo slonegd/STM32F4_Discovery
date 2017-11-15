@@ -22,7 +22,7 @@ template<class USART_, uint32_t bufSize, class RX, class TX, class RTS, class LE
 class USART : USART_
 {
 public:
-    volatile uint8_t Buffer[bufSize];
+    volatile uint8_t buffer[bufSize];
 
     using Boudrate = typename USART_::Boudrate;
     enum ParityEn { disable, enable };
@@ -45,13 +45,14 @@ public:
     }
     inline void disableRx()     { DMArx::Disable(); }
     inline uint32_t byteQtyRX() { return bufSize - DMArx::QtyTransactionsLeft(); }
+    inline void sendByte (uint8_t val) { USART_::sendByte(val); }
     inline void startTX (uint32_t qty)
     {
         DMAtx::SetQtyTransactions (qty);
         DMAtx::Enable();
         LED::Set();
     }
-    inline void stopTX() { DMAtx::Disable(); }
+    inline void disableTX() { DMAtx::Disable(); }
     inline bool isCompleteTX()  { return false; }
     // обработчики прерываний
     // возвращает true если источник прерывания наш
@@ -70,7 +71,7 @@ public:
     inline void txCompleteHandler()
     {
         if ( DMAtx::TransferCompleteInterrupt() ) {
-            stopTX();
+            disableTX();
             LED::Clear();
             enableRX();
         }
@@ -129,43 +130,44 @@ void USART<USART_, bufSize, RX, TX, RTS, LED>::init (Settings set)
         USART_::ParityEnable (false);
     }
     USART_::SetStopBits (set.stopBits);
-//    USART1->CR1 |= USART_CR1_RE_Msk;
-//    USART1->CR1 |= USART_CR1_TE_Msk;
     USART_::RXenable (true);
     USART_::TXenable (true);
     USART_::DMArxEnable();
     USART_::DMAtxEnable();
-//    USART1->CR1 |= USART_CR1_UE_Msk;
     USART_::Enable (true);
 
-/*    // дма
+    // дма
     DMArx::ClockEnable();
-    DMArx::SetMemoryAdr ( (uint32_t) this );
+    DMArx::SetMemoryAdr ( (uint32_t)buffer );
     DMArx::SetPeriphAdr ( (uint32_t) &(USART_::data()) );
-    DMArx::SetDirection (DMArx::DataDirection::PerToMem);
-    DMArx::SetMemoryTransactionSize (DMArx::DataSize::byte8);
-    DMArx::SetPeriphTransactionSize (DMArx::DataSize::byte8);
-    DMArx::SetMemoryInc (true);
-    DMArx::SetPeriphInc (false);
-    DMArx::SetCircularMode (true);
-    DMArx::SetChannel (USART_::DMAChannel);
+    DMArx::SetQtyTransactions (bufSize);
+    union {
+        typename DMArx::Configure_t configureRx;
+        typename DMAtx::Configure_t configureTx;
+    };
+    configureRx.Enable = true;
+    configureRx.dataDir = DMArx::DataDirection::PerToMem;
+    configureRx.memSize = DMArx::DataSize::byte8;
+    configureRx.perSize = DMArx::DataSize::byte8;
+    configureRx.memInc = true;
+    configureRx.perInc = false;
+    configureRx.circularMode = true;
+    configureRx.channel = USART_::DMAChannel;
+    DMArx::Configure (configureRx);
     enableRX();
 
-    DMAtx::SetMemoryAdr ( (uint32_t) this );
+    DMAtx::SetMemoryAdr ( (uint32_t)buffer );
     DMAtx::SetPeriphAdr ( (uint32_t) &(USART_::data()) );
-    DMAtx::SetDirection (DMAtx::DataDirection::MemToPer);
-    DMAtx::SetMemoryTransactionSize (DMAtx::DataSize::byte8);
-    DMAtx::SetPeriphTransactionSize (DMAtx::DataSize::byte8);
-    DMAtx::SetMemoryInc (true);
-    DMAtx::SetPeriphInc (false);
-    DMAtx::SetCircularMode (false);
-    DMAtx::SetChannel (USART_::DMAChannel);
+    configureTx.Enable = false;
+    configureTx.dataDir = DMArx::DataDirection::MemToPer;
+    configureTx.circularMode = false;
+    DMAtx::Configure (configureTx);
 
     // прерывания
     USART_::EnableIDLEinterrupt();
     NVIC_EnableIRQ(USART_::IRQn);
     DMAtx::EnableTransferCompleteInterrupt();
-    NVIC_EnableIRQ(DMAtx::IRQn);*/
+    NVIC_EnableIRQ(DMAtx::IRQn);
 }
 
 

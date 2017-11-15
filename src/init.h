@@ -50,7 +50,7 @@ using TXpin = PA2;
 using RTSpin = PA5;
 using LEDpin = Gled;
 const uint8_t bufSize = 30;
-using USART_ = USART<USART1_t, bufSize, RXpin, TXpin, RTSpin, LEDpin>;
+using USART_ = USART<USART2_t, bufSize, RXpin, TXpin, RTSpin, LEDpin>;
 USART_ uart;
 
 // модбас

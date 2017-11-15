@@ -1,6 +1,6 @@
 #include "init.h"
 
-uint16_t i = 0;
+uint8_t i = 0;
 
 int main(void)
 {
@@ -41,6 +41,9 @@ int main(void)
     butTimer.setTimeAndStart (200);
     txTimer.setTimeAndStart  (100);
 
+    //для отладки
+    modbus.uart.disableRx();  
+
    
     while (1)
     {
@@ -51,8 +54,14 @@ int main(void)
             modbus.foreachRegForActions (mbRegInAction);
         }
 
-        if ( txTimer.event() )
-            modbus.uart.startTX (5);
+        if ( txTimer.event() ) {
+            modbus.uart.disableTX();
+            modbus.uart.buffer[0] = 1;
+            modbus.uart.buffer[1] = 2;
+            modbus.uart.buffer[3] = 3;
+            modbus.uart.startTX (7);
+            //modbus.uart.sendByte (i);
+        }
 
 
         if ( ledTimer.event() )
@@ -74,11 +83,10 @@ int main(void)
                                     goUp;
                 pwm.setD (d);
 
-                if ( pwm.isOutEnable() ) {
+                if ( pwm.isOutEnable() )
                     pwm.outDisable();
-                } else {
+                else 
                     pwm.outEnable();
-                }
 
                 flash.data.d2++;
             }
@@ -101,7 +109,7 @@ extern "C" void USART1_IRQHandler()
     modbus.idleHandler();
 }
 
-extern "C" void DMA1_Stream7_IRQHandler()
+extern "C" void DMA1_Stream6_IRQHandler()
 {
     modbus.uart.txCompleteHandler();
 }

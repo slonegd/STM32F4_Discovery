@@ -5,6 +5,7 @@
 #include "stm32f4xx.h"
 #include "DMA_ral.h"
 #include "RCC_ral.h"
+#include "bitbanding.h"
 
 namespace USART_ral {
 
@@ -257,6 +258,9 @@ public:
 
     static const Channels DMAChannel = DMAChannel_;
     static const RCC_t::Bus bus = Bus_;
+    static const uint32_t Base = USARTptr;
+
+//    static constexpr uint32_t BKPSRAM_BB_BASE
     static constexpr IRQn_Type IRQn = 
         USARTptr == USART1_BASE ? USART1_IRQn :
         USARTptr == USART2_BASE ? USART2_IRQn :
@@ -266,13 +270,9 @@ public:
 
 
     static void ClockEnable() { *((uint32_t*)(RCC_BASE + ClkEnOffset)) |= ClkEnMask; }
-    static void Enable (bool val)      { conf1().bits.UE = val; }
-    static void RXenable (bool val)    { 
-        //conf1().bits.RE = val; 
-        conf1().reg |= (uint32_t)val << RE;
-        //USART1->CR1 |= USART_CR1_RE_Msk;
-    }
-    static void TXenable (bool val)    { conf1().bits.TE = val; }
+    static void Enable (bool val)      { BITBAND_SET(conf1(), UE, val); }
+    static void RXenable (bool val)    { BITBAND_SET(conf1(), RE, val); }
+    static void TXenable (bool val)    { BITBAND_SET(conf1(), TE, val); }
     static void DMAtxEnable() { conf3().bits.DMAT = true; }
     static void DMArxEnable() { conf3().bits.DMAR = true; }
     static void SetBoudRate (Boudrate val)
@@ -283,16 +283,17 @@ public:
             boudrate().reg = RCC_t::getAPB2clock() / val;
         }
     }
-    static void ParityEnable (bool val)    { conf1().bits.PCE = val; }
-    static void SetParity (Parity val)     { conf1().bits.PS = val; }
+    static void ParityEnable (bool val)    { BITBAND_SET(conf1(), PCE, val); }
+    static void SetParity (Parity val)     { BITBAND_SET(conf1(), PS, val); }
     static void SetStopBits (StopBits val) { conf2().bits.STOP = val; }
-    static void EnableIDLEinterrupt()      { conf1().bits.IDLEIE = true; }
+    static void EnableIDLEinterrupt()      { BITBAND_SET(conf1(), IDLEIE, true); }
     static bool IDLEinterrupt()            { return status().bits.IDLE; }
     static void ClearIDLEinterruptFlag()
     {
         status().reg;
         data().reg;
     }
+    static void sendByte (uint8_t val) { data().reg = val; }
 
 
 protected:

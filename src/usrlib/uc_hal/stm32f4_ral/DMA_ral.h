@@ -3,10 +3,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "stm32f4xx.h"
+#include "bitbanding.h"
 
 namespace DMA_ral {
 
     struct CR_t {
+        enum { Offset = 0x00 };
         enum DataDirection {
             PerToMem    = 0b00,
             MemToPer    = 0b01,
@@ -68,6 +70,10 @@ namespace DMA_ral {
             volatile Channels CHSEL     :3;
             // Bits 31:28 Reserved, must be kept at reset value.
             volatile uint32_t dcb1      :4;
+        };
+        enum { EN = 0, DMEIE, TEIE, HTIE, TCIE, PFCTRL, DIR, CIRC = 8, PINC,
+            MINC, PSIZE, MSIZE = 13, PINCOS = 15, PL, DBM = 18, CT, PBURST,
+            MBURST = 23, CHSEL = 25
         };
         union {
             volatile Bits bits;
@@ -302,6 +308,7 @@ public:
     using DataSize = DMA_ral::CR_t::DataSize;
     using Channels = DMA_ral::CR_t::Channels;
 
+    static const uint32_t Base = DMAstreamPtr;
     static constexpr IRQn_Type IRQn = 
         DMAstreamPtr == DMA1_Stream0_BASE ? DMA1_Stream0_IRQn :
         DMAstreamPtr == DMA1_Stream1_BASE ? DMA1_Stream1_IRQn :
@@ -322,20 +329,44 @@ public:
                                             NonMaskableInt_IRQn;
 
     static void ClockEnable() { RCC->AHB1ENR |= (uint32_t)1 << (DMAn + 20); }
-    static void Enable()  { conf().bits.EN = true; }
-    static void Disable() { conf().bits.EN = false; }
     static void SetMemoryAdr (uint32_t val) { memAdr0().reg = val; }
     static void SetPeriphAdr (uint32_t val) { perAdr().reg = val; }
-    static void SetDirection (DataDirection val) { conf().bits.DIR = val; }
-    static void SetMemoryTransactionSize (DataSize val) { conf().bits.MSIZE = val; }
-    static void SetPeriphTransactionSize (DataSize val) { conf().bits.PSIZE = val; }
-    static void SetMemoryInc (bool b)       { conf().bits.MINC = b; }
-    static void SetPeriphInc (bool b)       { conf().bits.PINC = b; }
-    static void SetCircularMode (bool b)    { conf().bits.CIRC = b; }
-    static void SetChannel (Channels val)   { conf().bits.CHSEL = val; }
-    static void SetQtyTransactions (uint16_t val) { nData().reg = val; }
+    static void Enable()  { BITBAND_SET(conf(), EN, true); }
+    static void Disable() { BITBAND_SET(conf(), EN, false); }
+    static void SetDirection (DataDirection val) { BIT2BAND_SET(conf(), DIR, val); }
+    static void SetMemoryTransactionSize (DataSize val) { BIT2BAND_SET(conf(), MSIZE, val); }
+    static void SetPeriphTransactionSize (DataSize val) { BIT2BAND_SET(conf(), PSIZE, val); }
+    static void SetMemoryInc (bool val)     { BITBAND_SET(conf(), MINC, val); }
+    static void SetPeriphInc (bool val)     { BITBAND_SET(conf(), PINC, val); }
+    static void SetCircularMode (bool val)  { BITBAND_SET(conf(), CIRC, val); }
+    static void SetChannel (Channels val)   { BIT3BAND_SET(conf(), CHSEL, val); }
+    static void EnableTransferCompleteInterrupt() { BITBAND_SET(conf(), TCIE, true); }
+    struct Configure_t { 
+        bool Enable; 
+        DataDirection dataDir;
+        DataSize memSize;
+        DataSize perSize;
+        bool memInc;
+        bool perInc;
+        bool circularMode;
+        Channels channel;
+    };
+    static void Configure (Configure_t& c)
+    {
+        DMA_ral::CR_t tmp;
+        tmp.bits.EN = c.Enable;
+        tmp.bits.DIR = c.dataDir;
+        tmp.bits.MSIZE = c.memSize;
+        tmp.bits.PSIZE = c.perSize;
+        tmp.bits.MINC = c.memInc;
+        tmp.bits.PINC = c.perInc;
+        tmp.bits.CIRC = c.circularMode;
+        tmp.bits.CHSEL = c.channel;
+        conf().reg = tmp.reg;
+    }
+    static void SetQtyTransactions (uint16_t val) { nData().reg = (uint32_t)val; }
     static uint16_t QtyTransactionsLeft()   { return nData().reg; }
-    static void EnableTransferCompleteInterrupt() { conf().bits.TCIE = true; }
+    
     static bool TransferCompleteInterrupt() 
     {
         static constexpr uint32_t bitPos = 
