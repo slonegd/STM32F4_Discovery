@@ -41,7 +41,7 @@ namespace DMA_ral {
             // Bit 4 TCIE: Transfer complete interrupt enable
             volatile bool TCIE          :1;
             // Bit 5 PFCTRL: Peripheral flow controller
-            volatile uint32_t PFCTRL    :1;
+            volatile bool PFCTRL    :1;
             // Bits 7:6 DIR[1:0]: Data transfer direction
             volatile DataDirection DIR  :2;
             // Bit 8 CIRC: Circular mode
@@ -112,7 +112,7 @@ namespace DMA_ral {
     };
 
     struct LISR_t {
-        static const uint8_t offset = 0;
+        enum { Offset = 0 };
         struct Bits {
             // Bits 22, 16, 6, 0 FEIFx: Stream x FIFO error interrupt flag (x=3..0)
             volatile bool FEIF0     :1;
@@ -155,7 +155,7 @@ namespace DMA_ral {
     };
 
     struct HISR_t {
-        static const uint8_t offset = 0x04;
+        enum { Offset = 0x04 };
         struct Bits {
             volatile bool FEIF4     :1;
             volatile uint32_t dcb1  :1;
@@ -191,7 +191,7 @@ namespace DMA_ral {
     };
 
     struct LIFCR_t {
-        static const uint8_t offset = 0x08;
+        enum { Offset = 0x08 };
         struct Bits {
             volatile bool CFEIF0     :1;
             volatile uint32_t dcb1   :1;
@@ -227,7 +227,7 @@ namespace DMA_ral {
     };
 
     struct HIFCR_t {
-        static const uint8_t offset = 0x0C;
+        enum { Offset = 0x0C };
         struct Bits {
             volatile bool CFEIF4     :1;
             volatile uint32_t dcb1   :1;
@@ -331,8 +331,14 @@ public:
     static void ClockEnable() { RCC->AHB1ENR |= (uint32_t)1 << (DMAn + 20); }
     static void SetMemoryAdr (uint32_t val) { memAdr0().reg = val; }
     static void SetPeriphAdr (uint32_t val) { perAdr().reg = val; }
-    static void Enable()  { BITBAND_SET(conf(), EN, true); }
-    static void Disable() { BITBAND_SET(conf(), EN, false); }
+    static void Enable()  { 
+        DMA1_Stream6->CR |= DMA_SxCR_EN_Msk;
+    //    BITBAND_SET(conf(), EN, true); 
+    }
+    static void Disable() { 
+        BITBAND_SET(conf(), EN, false); 
+        while (conf().reg & (uint32_t)1<<EN) {}
+    }
     static void SetDirection (DataDirection val) { BIT2BAND_SET(conf(), DIR, val); }
     static void SetMemoryTransactionSize (DataSize val) { BIT2BAND_SET(conf(), MSIZE, val); }
     static void SetPeriphTransactionSize (DataSize val) { BIT2BAND_SET(conf(), PSIZE, val); }
@@ -353,7 +359,7 @@ public:
     };
     static void Configure (Configure_t& c)
     {
-        DMA_ral::CR_t tmp;
+        DMA_ral::CR_t tmp = {0};
         tmp.bits.EN = c.Enable;
         tmp.bits.DIR = c.dataDir;
         tmp.bits.MSIZE = c.memSize;
@@ -362,6 +368,7 @@ public:
         tmp.bits.PINC = c.perInc;
         tmp.bits.CIRC = c.circularMode;
         tmp.bits.CHSEL = c.channel;
+        tmp.bits.PFCTRL = true;
         conf().reg = tmp.reg;
     }
     static void SetQtyTransactions (uint16_t val) { nData().reg = (uint32_t)val; }
@@ -369,12 +376,11 @@ public:
     
     static bool TransferCompleteInterrupt() 
     {
-        static constexpr uint32_t bitPos = 
-            DMAstreamN == 0 || DMAstreamN == 4 ? 5  :
-            DMAstreamN == 1 || DMAstreamN == 5 ? 11 :
-            DMAstreamN == 2 || DMAstreamN == 6 ? 21 :
-                                                 27;
-        return  interruptStatus().reg & ((uint32_t)1 << bitPos == 1);
+        return  (interruptStatus().reg & ((uint32_t)1 << bitPosInDMAregs)) != 0;
+    }
+    static void ClearFlagTransferCompleteInterrupt()
+    {
+        clearInterruptFlag().reg |= (uint32_t)1 << bitPosInDMAregs;
     }
 
 
@@ -394,7 +400,7 @@ protected:
 
     static volatile DMA_ral::LISR_t &interruptStatus()
     { return (DMA_ral::LISR_t&)  *((uint32_t*)ISRadr); }
-    static volatile DMA_ral::LISR_t &clearInterruptFlag()
+    static volatile DMA_ral::LIFCR_t &clearInterruptFlag()
     { return (DMA_ral::LIFCR_t&) *((uint32_t*)IFCRadr); }
 
 private:
@@ -418,16 +424,24 @@ private:
         DMAstreamPtr == DMA1_Stream6_BASE || DMAstreamPtr == DMA2_Stream6_BASE ? 6 :
                                                                                  7;
     static constexpr uint32_t ISRadr =
-        DMAn == 1 && DMAstreamN < 5 ? DMA1_BASE + DMA_ral::LISR_t::offset :
-        DMAn == 1 && DMAstreamN < 4 ? DMA1_BASE + DMA_ral::HISR_t::offset :
-        DMAn == 2 && DMAstreamN < 5 ? DMA2_BASE + DMA_ral::LISR_t::offset :
-                                      DMA2_BASE + DMA_ral::HISR_t::offset;
+        DMAn == 1 && DMAstreamN < 5 ? DMA1_BASE + DMA_ral::LISR_t::Offset :
+        DMAn == 1 && DMAstreamN > 4 ? DMA1_BASE + DMA_ral::HISR_t::Offset :
+        DMAn == 2 && DMAstreamN < 5 ? DMA2_BASE + DMA_ral::LISR_t::Offset :
+                                      DMA2_BASE + DMA_ral::HISR_t::Offset;
 
     static constexpr uint32_t IFCRadr =
-        DMAn == 1 && DMAstreamN < 5 ? DMA1_BASE + DMA_ral::LIFCR_t::offset :
-        DMAn == 1 && DMAstreamN < 4 ? DMA1_BASE + DMA_ral::HIFCR_t::offset :
-        DMAn == 2 && DMAstreamN < 5 ? DMA2_BASE + DMA_ral::LIFCR_t::offset :
-                                      DMA2_BASE + DMA_ral::HIFCR_t::offset;
+        DMAn == 1 && DMAstreamN < 5 ? DMA1_BASE + DMA_ral::LIFCR_t::Offset :
+        DMAn == 1 && DMAstreamN > 4 ? DMA1_BASE + DMA_ral::HIFCR_t::Offset :
+        DMAn == 2 && DMAstreamN < 5 ? DMA2_BASE + DMA_ral::LIFCR_t::Offset :
+                                      DMA2_BASE + DMA_ral::HIFCR_t::Offset;
+    
+    static constexpr uint32_t bitPosInDMAregs = 
+        DMAstreamN == 0 || DMAstreamN == 4 ? 5  :
+        DMAstreamN == 1 || DMAstreamN == 5 ? 11 :
+        DMAstreamN == 2 || DMAstreamN == 6 ? 21 :
+                                             27;
+
+
 
 };
 

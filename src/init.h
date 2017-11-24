@@ -111,10 +111,6 @@ inline void PortsInit (void)
                      Oled::OutType::PushPull,
                      Oled::OutSpeed::High,
                      Oled::PullResistor::No);
-    Gled::Configure (Gled::Mode::OutputMode,
-                     Gled::OutType::PushPull,
-                     Gled::OutSpeed::High,
-                     Gled::PullResistor::No);
 
     Button::Port::ClockEnable();
 }

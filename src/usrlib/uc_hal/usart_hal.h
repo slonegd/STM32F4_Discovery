@@ -38,7 +38,7 @@ public:
     using DMAtx = typename USART_::DMAtx;
 
     void init (Settings set);
-    inline void enableRX ()
+    inline void DMAenableRX ()
     {
         DMArx::SetQtyTransactions (bufSize);
         DMArx::Enable(); 
@@ -46,13 +46,14 @@ public:
     inline void disableRx()     { DMArx::Disable(); }
     inline uint32_t byteQtyRX() { return bufSize - DMArx::QtyTransactionsLeft(); }
     inline void sendByte (uint8_t val) { USART_::sendByte(val); }
-    inline void startTX (uint32_t qty)
+    void startTX (uint32_t qty)
     {
-        DMAtx::SetQtyTransactions (qty);
-        DMAtx::Enable();
         LED::Set();
+        DMAtx::Disable();
+        DMAtx::SetQtyTransactions (qty);
+        DMAtx::Enable();   
     }
-    inline void disableTX() { DMAtx::Disable(); }
+    inline void disableTx() { DMAtx::Disable(); }
     inline bool isCompleteTX()  { return false; }
     // обработчики прерываний
     // возвращает true если источник прерывания наш
@@ -71,9 +72,10 @@ public:
     inline void txCompleteHandler()
     {
         if ( DMAtx::TransferCompleteInterrupt() ) {
-            disableTX();
             LED::Clear();
-            enableRX();
+            //DMAtx::Disable();
+//            DMAenableRX();
+            DMAtx::ClearFlagTransferCompleteInterrupt();
         }
     }
 private:
@@ -154,7 +156,7 @@ void USART<USART_, bufSize, RX, TX, RTS, LED>::init (Settings set)
     configureRx.circularMode = true;
     configureRx.channel = USART_::DMAChannel;
     DMArx::Configure (configureRx);
-    enableRX();
+    //DMAenableRX();
 
     DMAtx::SetMemoryAdr ( (uint32_t)buffer );
     DMAtx::SetPeriphAdr ( (uint32_t) &(USART_::data()) );
