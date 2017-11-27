@@ -41,7 +41,7 @@ namespace DMA_ral {
             // Bit 4 TCIE: Transfer complete interrupt enable
             volatile bool TCIE          :1;
             // Bit 5 PFCTRL: Peripheral flow controller
-            volatile bool PFCTRL    :1;
+            volatile bool PFCTRL        :1;
             // Bits 7:6 DIR[1:0]: Data transfer direction
             volatile DataDirection DIR  :2;
             // Bit 8 CIRC: Circular mode
@@ -62,6 +62,8 @@ namespace DMA_ral {
             volatile uint32_t DBM       :1;
             // Bit 19 CT: Current target (only in double buffer mode)
             volatile uint32_t CT        :1;
+            // Bit 20 Reserved, must be kept at reset value.
+            volatile uint32_t dcb1      :1;
             // Bits 22:21 PBURST[1:0]: Peripheral burst transfer configuration
             volatile uint32_t PBURST    :2;
             // Bits 24:23 MBURST: Memory burst transfer configuration
@@ -69,7 +71,7 @@ namespace DMA_ral {
             // Bits 27:25 CHSEL[2:0]: Channel selection
             volatile Channels CHSEL     :3;
             // Bits 31:28 Reserved, must be kept at reset value.
-            volatile uint32_t dcb1      :4;
+            volatile uint32_t dcb2      :4;
         };
         enum { EN = 0, DMEIE, TEIE, HTIE, TCIE, PFCTRL, DIR, CIRC = 8, PINC,
             MINC, PSIZE, MSIZE = 13, PINCOS = 15, PL, DBM = 18, CT, PBURST,
@@ -82,33 +84,23 @@ namespace DMA_ral {
     };
 
     struct NDTR_t {
-        union {
-            volatile uint32_t reg;
-        };
+        volatile uint32_t reg;
     };
 
     struct PAR_t {
-        union {
-            volatile uint32_t reg;
-        };
+        volatile uint32_t reg;
     };
 
     struct M0AR_t {
-        union {
-            volatile uint32_t reg;
-        };
+        volatile uint32_t reg;
     };
 
     struct M1AR_t {
-        union {
-            volatile uint32_t reg;
-        };
+        volatile uint32_t reg;
     };
 
     struct FCR_t {
-        union {
-            volatile uint32_t reg;
-        };
+        volatile uint32_t reg;
     };
 
     struct LISR_t {
@@ -348,7 +340,6 @@ public:
     static void SetChannel (Channels val)   { BIT3BAND_SET(conf(), CHSEL, val); }
     static void EnableTransferCompleteInterrupt() { BITBAND_SET(conf(), TCIE, true); }
     struct Configure_t { 
-        bool Enable; 
         DataDirection dataDir;
         DataSize memSize;
         DataSize perSize;
@@ -359,8 +350,8 @@ public:
     };
     static void Configure (Configure_t& c)
     {
+        conf().reg = 0;
         DMA_ral::CR_t tmp = {0};
-        tmp.bits.EN = c.Enable;
         tmp.bits.DIR = c.dataDir;
         tmp.bits.MSIZE = c.memSize;
         tmp.bits.PSIZE = c.perSize;
@@ -368,7 +359,6 @@ public:
         tmp.bits.PINC = c.perInc;
         tmp.bits.CIRC = c.circularMode;
         tmp.bits.CHSEL = c.channel;
-        tmp.bits.PFCTRL = true;
         conf().reg = tmp.reg;
     }
     static void SetQtyTransactions (uint16_t val) { nData().reg = (uint32_t)val; }

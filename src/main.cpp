@@ -39,7 +39,7 @@ int main(void)
     // инициализация программных таймеров задач
     ledTimer.setTimeAndStart (500);
     butTimer.setTimeAndStart (200);
-    txTimer.setTimeAndStart  (1000);
+    txTimer.setTimeAndStart  (100);
 
     //для отладки
     modbus.uart.disableRx();  
@@ -55,12 +55,10 @@ int main(void)
         }
 
         if ( txTimer.event() ) {
-//            modbus.uart.disableRx();
             modbus.uart.buffer[0] = 1;
             modbus.uart.buffer[1] = 2;
-            modbus.uart.buffer[3] = 3;
-            modbus.uart.startTX (7);
-            //modbus.uart.sendByte (i);
+            modbus.uart.buffer[3] = i;
+            modbus.uart.startTX(7);
         }
 
 

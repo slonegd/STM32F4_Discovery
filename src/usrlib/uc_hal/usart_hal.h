@@ -147,7 +147,6 @@ void USART<USART_, bufSize, RX, TX, RTS, LED>::init (Settings set)
         typename DMArx::Configure_t configureRx;
         typename DMAtx::Configure_t configureTx;
     };
-    configureRx.Enable = true;
     configureRx.dataDir = DMArx::DataDirection::PerToMem;
     configureRx.memSize = DMArx::DataSize::byte8;
     configureRx.perSize = DMArx::DataSize::byte8;
@@ -156,14 +155,25 @@ void USART<USART_, bufSize, RX, TX, RTS, LED>::init (Settings set)
     configureRx.circularMode = true;
     configureRx.channel = USART_::DMAChannel;
     DMArx::Configure (configureRx);
-    //DMAenableRX();
+    //DMAenableRX(); для отладки закомент
 
     DMAtx::SetMemoryAdr ( (uint32_t)buffer );
     DMAtx::SetPeriphAdr ( (uint32_t) &(USART_::data()) );
-    configureTx.Enable = false;
     configureTx.dataDir = DMArx::DataDirection::MemToPer;
     configureTx.circularMode = false;
     DMAtx::Configure (configureTx);
+
+/*    RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN_Msk;
+    DMA1_Stream6->CR = 0;
+    while ( (DMA1_Stream6->CR & DMA_SxCR_EN_Msk) != 0) { }
+    DMA1_Stream6->M0AR = (uint32_t) buffer;
+    DMA1_Stream6->PAR  = (uint32_t) &(USART_::data());
+    DMA1_Stream6->CR = 0;
+    DMA1_Stream6->CR |= (uint32_t)0b01 << DMA_SxCR_DIR_Pos;
+    DMA1_Stream6->CR |= DMA_SxCR_MINC_Msk;
+    DMA1_Stream6->CR |= (uint32_t)0b100 << DMA_SxCR_CHSEL_Pos;
+    DMA1_Stream6->CR |= DMA_SxCR_TCIE_Msk;
+*/
 
     // прерывания
     USART_::EnableIDLEinterrupt();
