@@ -12,6 +12,7 @@
 #include "timers.h"
 #include "pinlist.h"
 #include "modbusSlave.h"
+#include "HD44780_hal.h"
 
 
 // discoveri 
@@ -43,6 +44,10 @@ Flash<FlashData, flashSector> flash;
 using PWMout = Rled;
 using PWMtimer = TIM4_t;
 PWM<PWMtimer, PWMout> pwm;
+
+// LCD
+using LCD_ = HD44780<PC4, PA4, PA5, PC0, PC1, PC2, PC3, DMA1stream1>;
+LCD_ LCD;
 
 // уарт модбаса
 using RXpin = PA3;

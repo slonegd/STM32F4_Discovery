@@ -1,4 +1,11 @@
+/*****************************************************************************
+ * для того, чтобы кирилица вместилась в char этот файл должен быть
+ * в кодировке cp1251
+ *////////////////////////////////////////////////////////////////////////////
 #include "init.h"
+#include <string>
+
+using namespace std;
 
 uint8_t i = 0;
 
@@ -6,17 +13,17 @@ int main(void)
 {
     makeDebugVar();
    
-    // РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРёСЃС‚РµРјРЅС‹С… С‡Р°СЃС‚РѕС‚
+    // инициализация системных частот
     CLKinit ();
     PortsInit ();
 
-    // СЌРЅРµСЂРіРѕРЅРµР·Р°РІРёСЃРёРјС‹Рµ РґР°РЅРЅС‹Рµ
+    // энергонезависимые данные
     if ( !flash.readFromFlash() ) {
         flash.data.d1 = 1;
         flash.data.d2 = 3;
     }
 
-    // РјРѕРґР±Р°СЃ, РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СѓР°СЂС‚
+    // модбас, инициализация уарт
     USART_::Settings set = {
         USART_::Boudrate::BR9600,
         USART_::ParityEn::disable,
@@ -25,8 +32,8 @@ int main(void)
     };
     modbus.uart.init (set);
 
-    // РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ С‚Р°Р№РјРµСЂР° СЃ С€РёРј
-    // РїСЂРµСЃРєР°Р»Р»РµСЂ СЃРїРµС†РѕРј, С‡С‚Р±С‹ Р±С‹Р»Рѕ РІРёРґРЅРѕ РЅР° РёРЅРґРёРєР°С‚РѕСЂРµ РІС‹СЃРѕРєРёРµ С‡Р°СЃС‚РѕС‚С‹
+    // инициализация таймера с шим
+    // прескаллер спецом, чтбы было видно на индикаторе высокие частоты
     PWMtimer::SetPrescaller (1000);
     pwm.setFreq (20000);
     pwm.setD (50);
@@ -36,13 +43,18 @@ int main(void)
     ADC1_t::ClockEnable();
     ADCaverage<ADC1_t, 16, PC0, DMA1stream0> current;
 
-    // РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїСЂРѕРіСЂР°РјРјРЅС‹С… С‚Р°Р№РјРµСЂРѕРІ Р·Р°РґР°С‡
+    // инициализация программных таймеров задач
     ledTimer.setTimeAndStart (500);
     butTimer.setTimeAndStart (200);
     txTimer.setTimeAndStart  (100);
 
-    //РґР»СЏ РѕС‚Р»Р°РґРєРё
-    modbus.uart.disableRx();  
+    //для отладки
+    modbus.uart.disableRx();
+
+    char string[] = "ПрЁ";
+    string[1] = 'i';
+    LCD.setLine(string, 0);
+    LCD.setLine("пока", 1);
 
    
     while (1)
@@ -55,10 +67,19 @@ int main(void)
         }
 
         if ( txTimer.event() ) {
-            modbus.uart.buffer[0] = 1;
-            modbus.uart.buffer[1] = 2;
-            modbus.uart.buffer[3] = i;
-            modbus.uart.startTX(7);
+            modbus.uart.buffer[0] = LCD_::DataPins::BSRvalue<0b0101>();
+            modbus.uart.buffer[1] = LCD_::DataPins::BSRvalue<0b0101>() >> 8;
+            modbus.uart.buffer[2] = LCD_::DataPins::BSRvalue<0b0101>() >> 16;
+            modbus.uart.buffer[3] = LCD_::DataPins::BSRvalue<0b0101>() >> 24;
+            modbus.uart.buffer[4] = string[0];
+            modbus.uart.buffer[5] = string[1];
+            modbus.uart.buffer[6] = string[2];
+            modbus.uart.buffer[7] = size(string);
+            modbus.uart.buffer[8] = i;
+            modbus.uart.startTX(10);
+
+            LCD.setLine("0123456789abcdef",0);
+            LCD.setLine("f0123456789abcd",1);
         }
 
 
@@ -95,7 +116,7 @@ int main(void)
 
 
 //////////////////////////////////////////////////////////////////////////////
-//       РџР Р•Р Р«Р’РђРќРРЇ
+//       ПРЕРЫВАНИЯ
 //////////////////////////////////////////////////////////////////////////////
 extern "C" void SysTick_Handler()
 {

@@ -64,21 +64,21 @@ struct MakePinList<Position>
 // преобразует список пинов в список портов этих пинов \/
 ////////////////////////////////////////////////////////////////////////////////
 template <class TList> struct GetPorts;
-        // пустая специализация
-		template <> struct GetPorts<NullType>
-		{
-			using Result = NullType;
-		};
+// пустая специализация
+template <> struct GetPorts<NullType>
+{
+    using Result = NullType;
+};
 
-		template <class Head, class Tail>
-		struct GetPorts< Loki::Typelist<Head, Tail> >
-		{
-		private:
-			using Port = typename Head::Pin::Port;
-			using L1 = typename GetPorts<Tail>::Result;
-		public:
-			using Result = Loki::Typelist<Port, L1>;
-        };
+template <class Head, class Tail>
+struct GetPorts< Loki::Typelist<Head, Tail> >
+{
+private:
+    using Port = typename Head::Pin::Port;
+    using L1 = typename GetPorts<Tail>::Result;
+public:
+    using Result = Loki::Typelist<Port, L1>;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // создает список пинов конкретного порта \/
@@ -213,4 +213,15 @@ template <class PortList, class PinList> struct PortWriteIterator;
         }
     };
 
+
+////////////////////////////////////////////////////////////////////////////////
+// выдаёт значение регистра bsr для пинлиста одного порта в зависимости
+// от значения
+////////////////////////////////////////////////////////////////////////////////
+
+template <class PinList, uint16_t val> struct BSRValue
+{
+    static const uint16_t PortMask = GetPortMask<PinList>::value;
+    static const uint32_t Get = (PortMask & val | ((uint32_t)(PortMask & ~val) << 16));
+};
 
