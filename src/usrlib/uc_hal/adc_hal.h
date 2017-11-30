@@ -126,6 +126,10 @@ public:
             Channel<ADC_,DMA_>().defined,
             "Поток ДМА не работает с этим АЦП"
         );
+        /*static_assert (
+            !DMA_::Using,
+            "канал DMA уже используется"
+        );*/
         ADC_::ClockEnable();
     }
 private:

@@ -194,7 +194,10 @@ namespace RCC_ral {
     };
 
     struct AHB1ENR_t {
-        uint32_t reg;
+        union {
+            volatile uint32_t reg;
+        };
+        
     };
 
     struct AHB2ENR_t {
@@ -210,9 +213,8 @@ namespace RCC_ral {
     };
 
     struct APB1ENR_t {
-        enum { offset = 0x40 };
-        static const uint8_t Offset = 0x40;
-        struct APB1ENRbits {
+        enum { Offset = 0x40 };
+        struct Bits {
             volatile bool TIM2EN    :1;
             volatile bool TIM3EN    :1;
             volatile bool TIM4EN    :1;
@@ -244,7 +246,7 @@ namespace RCC_ral {
             uint32_t dcb6           :2;
         };
         union {
-            volatile APB1ENRbits bits;
+            volatile Bits bits;
             volatile uint32_t reg;
         };
         

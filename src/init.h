@@ -38,7 +38,10 @@ struct FlashData {
     uint16_t d2;
 };
 const uint8_t flashSector = 2;
-Flash<FlashData, flashSector> flash;
+auto flash = Flash<FlashData, flashSector> ( {
+    .d1 = 1,
+    .d2 = 3
+} );
 
 // шим
 using PWMout = Rled;
@@ -46,13 +49,22 @@ using PWMtimer = TIM4_t;
 PWM<PWMtimer, PWMout> pwm;
 
 // LCD
-using LCD_ = HD44780<PC4, PA4, PA5, PC0, PC1, PC2, PC3, DMA1stream1>;
+using RSpin = PC4;
+using RWpin = PA4;
+using Epin  = PA5;
+using D4pin = PC0;
+using D5pin = PC1;
+using D6pin = PC2;
+using D7pin = PC3;
+using LCDtim = TIM8_t;
+using LCDdma = DMA2stream2;
+using LCD_ = HD44780<RSpin, RWpin, Epin, D4pin, D5pin, D6pin, D7pin, LCDtim, LCDdma>;
 LCD_ LCD;
 
 // уарт модбаса
 using RXpin = PA3;
 using TXpin = PA2;
-using RTSpin = PA5;
+using RTSpin = PA6; // временно изменил с PA5 для отладки LCD
 using LEDpin = Gled;
 const uint8_t bufSize = 30;
 using USART_ = USART<USART2_t, bufSize, RXpin, TXpin, RTSpin, LEDpin>;
@@ -84,8 +96,8 @@ inline void mbRegInAction ()
 }
 
 
-
-inline void CLKinit (void)
+// эта функция вызываеться первой в startup файле
+extern "C" void CLKinit (void)
 {
     FLASH_t::SetLatency (FLASH_t::Latency::latency_5);
     RCC_t::HSEon();

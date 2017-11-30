@@ -13,6 +13,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+namespace Pin_HAL {
+
+}
+
 
 template <class PORT, uint8_t pin>
 class Pin_t : protected PORT
@@ -42,8 +46,7 @@ public:
         PORT::pupd().reg    &= ~((uint32_t)0b1  << pin);
         PORT::pupd().reg    |=  (uint32_t)res   << pin;
     }
-    template <AF func>
-    static void SetAltFunc()
+    template <AF func> static void SetAltFunc()
     {
         constexpr uint8_t reg = pin / 8;
         constexpr uint32_t mask = (uint32_t)func << (pin - 8*reg) * 4;

@@ -235,8 +235,7 @@ struct USART_t : public USART_ral::SR_t,
 extern const uint32_t fCPU;
 
 // ClkEnOffset оффсет для регистра из структуры RCC, разрешающий тактирование 
-template <uint32_t USARTptr, class DMAstreamRX, class DMAstreamTX, DMA_ral::CR_t::Channels DMAChannel_,
-          uint32_t ClkEnOffset, uint32_t ClkEnMask, RCC_t::Bus Bus_>
+template <uint32_t USARTptr, class DMAstreamRX, class DMAstreamTX, uint32_t ClkEnMask>
 class USARTx : USART_t
 {
 public:
@@ -256,11 +255,15 @@ public:
     using DMAtx = DMAstreamTX;
     using Channels = DMA_ral::CR_t::Channels;
 
-    static const Channels DMAChannel = DMAChannel_;
-    static const RCC_t::Bus bus = Bus_;
+    static constexpr DMA_ral::CR_t::Channels DMAChannel = 
+        USARTptr == USART6_BASE ? DMA_ral::CR_t::Channels::_5 :
+                                  DMA_ral::CR_t::Channels::_4;
+    static constexpr RCC_t::Bus bus =
+        USARTptr == USART1_BASE ? RCC_t::Bus::APB2 :
+        USARTptr == USART6_BASE ? RCC_t::Bus::APB2 :
+                                  RCC_t::Bus::APB1;
     static const uint32_t Base = USARTptr;
 
-//    static constexpr uint32_t BKPSRAM_BB_BASE
     static constexpr IRQn_Type IRQn = 
         USARTptr == USART1_BASE ? USART1_IRQn :
         USARTptr == USART2_BASE ? USART2_IRQn :
@@ -311,29 +314,28 @@ protected:
     { return (USART_ral::CR3_t &)  (*(USART_TypeDef*)USARTptr).CR3;  }
     static volatile USART_ral::GTPR_t &gtp()      
     { return (USART_ral::GTPR_t &) (*(USART_TypeDef*)USARTptr).GTPR; }
+
+
+private:
+    static constexpr uint32_t ClkEnOffset = 
+        bus == RCC_t::Bus::APB1 ? RCC_ral::APB1ENR_t::Offset :
+                                  RCC_ral::APB2ENR_t::Offset;
+
+
 };
 
-using USART1_t      = USARTx<USART1_BASE, DMA2stream5, DMA2stream7, DMA_ral::CR_t::Channels::_4,
-                      RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART1EN_Msk, RCC_t::Bus::APB2>;
+using USART1_t      = USARTx<USART1_BASE, DMA2stream5, DMA2stream7, RCC_APB2ENR_USART1EN_Msk>;
 // альтернатива с другим потоком дма
-using USART1alt_t   = USARTx<USART1_BASE, DMA2stream2, DMA2stream7, DMA_ral::CR_t::Channels::_4,
-                      RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART1EN_Msk, RCC_t::Bus::APB2>;
+using USART1alt_t   = USARTx<USART1_BASE, DMA2stream2, DMA2stream7, RCC_APB2ENR_USART1EN_Msk>;
 
-using USART2_t      = USARTx<USART2_BASE, DMA1stream5, DMA1stream6, DMA_ral::CR_t::Channels::_4,
-                      RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_USART2EN_Msk, RCC_t::Bus::APB1>;
+using USART2_t      = USARTx<USART2_BASE, DMA1stream5, DMA1stream6, RCC_APB1ENR_USART2EN_Msk>;
 
-using USART3_t      = USARTx<USART3_BASE, DMA1stream1, DMA1stream3 ,DMA_ral::CR_t::Channels::_4,
-                      RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_USART3EN_Msk, RCC_t::Bus::APB1>;
+using USART3_t      = USARTx<USART3_BASE, DMA1stream1, DMA1stream3, RCC_APB1ENR_USART3EN_Msk>;
 // альтернатива с другим потоком дма
-using USART3alt_t   = USARTx<USART3_BASE, DMA1stream1, DMA1stream4, DMA_ral::CR_t::Channels::_4,
-                      RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_USART3EN_Msk, RCC_t::Bus::APB1>;
+using USART3alt_t   = USARTx<USART3_BASE, DMA1stream1, DMA1stream4, RCC_APB1ENR_USART3EN_Msk>;
 
-using USART6_t      = USARTx<USART6_BASE, DMA2stream1, DMA2stream6, DMA_ral::CR_t::Channels::_5,
-                      RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART6EN_Msk, RCC_t::Bus::APB2>;
+using USART6_t      = USARTx<USART6_BASE, DMA2stream1, DMA2stream6, RCC_APB2ENR_USART6EN_Msk>;
 // альтернативы с другим потоком дма
-using USART6alt17_t = USARTx<USART6_BASE, DMA2stream1, DMA2stream7, DMA_ral::CR_t::Channels::_5,
-                      RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART6EN_Msk, RCC_t::Bus::APB2>;
-using USART6alt27_t = USARTx<USART6_BASE, DMA2stream2, DMA2stream7, DMA_ral::CR_t::Channels::_5,
-                      RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART6EN_Msk, RCC_t::Bus::APB2>;
-using USART6alt26_t = USARTx<USART6_BASE, DMA2stream2, DMA2stream6, DMA_ral::CR_t::Channels::_5,
-                      RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_USART6EN_Msk, RCC_t::Bus::APB2>;
+using USART6alt17_t = USARTx<USART6_BASE, DMA2stream1, DMA2stream7, RCC_APB2ENR_USART6EN_Msk>;
+using USART6alt27_t = USARTx<USART6_BASE, DMA2stream2, DMA2stream7, RCC_APB2ENR_USART6EN_Msk>;
+using USART6alt26_t = USARTx<USART6_BASE, DMA2stream2, DMA2stream6, RCC_APB2ENR_USART6EN_Msk>;

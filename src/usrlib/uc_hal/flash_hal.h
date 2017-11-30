@@ -70,7 +70,7 @@ public:
     DATA data;
     bool readFromFlash ();
     void update();
-    Flash ()
+    Flash (DATA d)
     {
         static_assert (
             Addres<sector>().defined,
@@ -81,6 +81,9 @@ public:
             "Размер сохраняемой структцры не может превышать 255 байт"
         );
         FLASH_t::EndOfProgInterruptEn();
+        if ( !readFromFlash() ) {
+            memcpy (&data, &d, sizeof(DATA));
+        }
     }
 private:
     static constexpr uint8_t QtyBytes = sizeof(DATA);

@@ -3,36 +3,26 @@
  * в кодировке cp1251
  *////////////////////////////////////////////////////////////////////////////
 #include "init.h"
-#include <string>
-
-using namespace std;
+#include <something.h>
 
 uint8_t i = 0;
 
 int main(void)
 {
+    // к этому моменту уже вызваны CLKinit (инициализация системных частот)
+    // и конструкторы глобальных объектов из файла init.h
     makeDebugVar();
-   
-    // инициализация системных частот
-    CLKinit ();
+
     PortsInit ();
 
-    // энергонезависимые данные
-    if ( !flash.readFromFlash() ) {
-        flash.data.d1 = 1;
-        flash.data.d2 = 3;
-    }
-
-    // модбас, инициализация уарт
-    USART_::Settings set = {
+    modbus.uart.init ( {
         USART_::Boudrate::BR9600,
         USART_::ParityEn::disable,
         USART_::Parity::even,
         USART_::StopBits::_1
-    };
-    modbus.uart.init (set);
+    } );
 
-    // инициализация таймера с шим
+    // таймер с шим
     // прескаллер спецом, чтбы было видно на индикаторе высокие частоты
     PWMtimer::SetPrescaller (1000);
     pwm.setFreq (20000);
@@ -75,8 +65,9 @@ int main(void)
             modbus.uart.buffer[5] = string[1];
             modbus.uart.buffer[6] = string[2];
             modbus.uart.buffer[7] = size(string);
-            modbus.uart.buffer[8] = i;
-            modbus.uart.startTX(10);
+            modbus.uart.buffer[8] = StaticAssertTypeEq<PA2,TXpin>();
+            modbus.uart.buffer[9] = i;
+            modbus.uart.startTX(15);
 
             LCD.setLine("0123456789abcdef",0);
             LCD.setLine("f0123456789abcd",1);

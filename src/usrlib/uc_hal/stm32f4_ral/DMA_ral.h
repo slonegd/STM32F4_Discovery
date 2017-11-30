@@ -320,6 +320,7 @@ public:
         DMAstreamPtr == DMA2_Stream7_BASE ? DMA1_Stream7_IRQn :
                                             NonMaskableInt_IRQn;
 
+
     static void ClockEnable() { RCC->AHB1ENR |= (uint32_t)1 << (DMAn + 20); }
     static void SetMemoryAdr (uint32_t val) { memAdr0().reg = val; }
     static void SetPeriphAdr (uint32_t val) { perAdr().reg = val; }
@@ -431,7 +432,7 @@ private:
         DMAstreamN == 2 || DMAstreamN == 6 ? 21 :
                                              27;
 
-
+    
 
 };
 

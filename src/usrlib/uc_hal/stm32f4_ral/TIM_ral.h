@@ -5,10 +5,12 @@
 #include "stm32f4xx.h"
 #include "GPIO_ral.h"
 #include "RCC_ral.h"
+#include "bitbanding.h"
 
 namespace TIM_ral {
 
     struct CR1_t {
+        enum { Offset = 0x00 };
         struct Bits_t {
             // Bit 0 CEN: Counter enable
             volatile bool CEN        :1;
@@ -34,7 +36,13 @@ namespace TIM_ral {
             // Bits 15:10 Reserved, must be kept at reset value.
             volatile uint32_t dcb    :22;
         };
-        volatile Bits_t bits;
+        enum {
+            CEN = 0, UDIS, URS, OPM, DIR, CMS, ARPE = 7, CKD
+        };
+        union {
+            volatile Bits_t bits;
+            volatile uint32_t reg;
+        };
     };
 
     struct CR2_t {
@@ -253,33 +261,28 @@ struct TIM_t : public TIM_ral::CR1_t,
 {
 
 };
-// ClkEnOffset оффсет для регистра из структуры RCC, разрешающий тактирование 
-template <uint32_t TIMptr, uint32_t ClkEnOffset, uint32_t ClkEnMask, AFR_t::AF af>
+
+template <uint32_t TIMptr, AFR_t::AF af>
 class TIM : TIM_t
 {
 public:
     using CompareMode = TIM_t::CCMR_t::CompareMode;
     static const AFR_t::AF AltFunc = af;
-protected:
-    static volatile TIM_ral::CR1_t  &conf1()    { return (TIM_ral::CR1_t &)    (*(TIM_TypeDef*)TIMptr).CR1;   }
-    static volatile TIM_ral::CR2_t  &conf2()    { return (TIM_ral::CR2_t &)    (*(TIM_TypeDef*)TIMptr).CR2;   }
-    static volatile TIM_ral::CCMR_t &captureMode()   { return (TIM_ral::CCMR_t &)   (*(TIM_TypeDef*)TIMptr).CCMR1; }
-    static volatile TIM_ral::CCER_t &captureEn()   { return (TIM_ral::CCER_t &)   (*(TIM_TypeDef*)TIMptr).CCER;  }
-    static volatile TIM_ral::PSC_t  &prescaler()   { return (TIM_ral::PSC_t &)    (*(TIM_TypeDef*)TIMptr).PSC;   }
-    static volatile TIM_ral::ARR_t  &autoReload()    { return (TIM_ral::ARR_t &)    (*(TIM_TypeDef*)TIMptr).ARR;   }
-    static volatile TIM_ral::CCR_t  &capture()    { return (TIM_ral::CCR_t &)    (*(TIM_TypeDef*)TIMptr).CCR1;  }
+    static const uint32_t Base = TIMptr;
 
-public:
     // включает тактирование таймера
-    static inline void ClockEnable()      { *((uint32_t*)(RCC_BASE + ClkEnOffset)) |= ClkEnMask; }
-    static inline void CounterEnable()    { conf1().bits.CEN = true; }
-    static inline bool IsCount()          { return conf1().bits.CEN; }
-    static inline void CounterDisable()   { conf1().bits.CEN = false; }
-    static inline void AutoReloadEnable() { conf1().bits.ARPE = true; }
-    static inline void SetAutoReloadValue (uint32_t val) { autoReload().reg = val; }
-    static inline void SetPrescaller (uint32_t val)      { prescaler().reg = val; }
+    static void ClockEnable() {
+        ClkEnable = true;
+        while ( !ClkEnable ) { };
+    }
+    static void CounterEnable()    { bitBand(Base, conf1().Offset, CEN) = true; }
+    static bool IsCount()          { return bitBand(Base, conf1().Offset, CEN); }
+    static void CounterDisable()   { bitBand(Base, conf1().Offset, CEN) = false; }
+    static void AutoReloadEnable() { bitBand(Base, conf1().Offset, ARPE) = true; }
+    static void SetAutoReloadValue (uint32_t val) { autoReload().reg = val; }
+    static void SetPrescaller (uint32_t val)      { prescaler().reg = val; }
     template <CompareMode cm, uint8_t channel>
-    static inline void  SetCompareMode ()
+    static void  SetCompareMode ()
     {
         // 0 для каналов 1,2; 1 для каналов 3,4
         constexpr uint8_t regN = channel / 3;
@@ -290,19 +293,38 @@ public:
         MODIFY_REG (captureMode().regs[regN], ClearMask, SetMask);
     }
     template <uint8_t channel>
-    static inline void CompareEnable ()   { captureEn().reg |= (uint16_t)1 << (channel-1)*4; }
+    static void CompareEnable ()   { captureEn().reg |= (uint16_t)1 << (channel-1)*4; }
     template <uint8_t channel>
-    static inline void CompareDisable ()  { captureEn().reg &= ~( (uint16_t)1 << (channel-1)*4 ); }
+    static void CompareDisable ()  { captureEn().reg &= ~( (uint16_t)1 << (channel-1)*4 ); }
     template <uint8_t channel>
-    static inline bool IsCompareEnable () { return ( (captureEn().reg & ((uint16_t)1 << (channel-1)*4)) != 0); }
+    static bool IsCompareEnable () { return ( (captureEn().reg & ((uint16_t)1 << (channel-1)*4)) != 0); }
     template <uint8_t channel>
-    static inline void SetCompareValue (uint32_t val) { capture().regs[channel-1] = val; }
+    static void SetCompareValue (uint32_t val) { capture().regs[channel-1] = val; }
+
+protected:
+    static volatile TIM_ral::CR1_t  &conf1()       { return (TIM_ral::CR1_t &)    (*(TIM_TypeDef*)TIMptr).CR1;   }
+    static volatile TIM_ral::CR2_t  &conf2()       { return (TIM_ral::CR2_t &)    (*(TIM_TypeDef*)TIMptr).CR2;   }
+    static volatile TIM_ral::CCMR_t &captureMode() { return (TIM_ral::CCMR_t &)   (*(TIM_TypeDef*)TIMptr).CCMR1; }
+    static volatile TIM_ral::CCER_t &captureEn()   { return (TIM_ral::CCER_t &)   (*(TIM_TypeDef*)TIMptr).CCER;  }
+    static volatile TIM_ral::PSC_t  &prescaler()   { return (TIM_ral::PSC_t &)    (*(TIM_TypeDef*)TIMptr).PSC;   }
+    static volatile TIM_ral::ARR_t  &autoReload()  { return (TIM_ral::ARR_t &)    (*(TIM_TypeDef*)TIMptr).ARR;   }
+    static volatile TIM_ral::CCR_t  &capture()     { return (TIM_ral::CCR_t &)    (*(TIM_TypeDef*)TIMptr).CCR1;  }    
     
+private:
+    static constexpr volatile uint32_t& ClkEnable = 
+        TIMptr == TIM2_BASE ? bitBand(RCC_BASE, RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_TIM2EN_Pos) :
+        TIMptr == TIM3_BASE ? bitBand(RCC_BASE, RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_TIM3EN_Pos) :
+        TIMptr == TIM4_BASE ? bitBand(RCC_BASE, RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_TIM4EN_Pos) :
+        TIMptr == TIM5_BASE ? bitBand(RCC_BASE, RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_TIM5EN_Pos) :
+        TIMptr == TIM8_BASE ? bitBand(RCC_BASE, RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_TIM8EN_Pos) :
+                              bitBand(RCC_BASE, RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_TIM1EN_Pos);
 };
 
-using TIM1_t = TIM<TIM1_BASE, RCC_ral::APB2ENR_t::Offset, RCC_APB2ENR_TIM1EN_Msk, AFR_t::AF::AF1>;
-using TIM2_t = TIM<TIM2_BASE, RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_TIM2EN_Msk, AFR_t::AF::AF1>;
-using TIM3_t = TIM<TIM3_BASE, RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_TIM3EN_Msk, AFR_t::AF::AF2>;
-using TIM4_t = TIM<TIM4_BASE, RCC_ral::APB1ENR_t::Offset, RCC_APB1ENR_TIM4EN_Msk, AFR_t::AF::AF2>;
+using TIM1_t = TIM<TIM1_BASE, AFR_t::AF::AF1>;
+using TIM2_t = TIM<TIM2_BASE, AFR_t::AF::AF1>;
+using TIM3_t = TIM<TIM3_BASE, AFR_t::AF::AF2>;
+using TIM4_t = TIM<TIM4_BASE, AFR_t::AF::AF2>;
+using TIM5_t = TIM<TIM5_BASE, AFR_t::AF::AF2>;
 
+using TIM8_t = TIM<TIM8_BASE, AFR_t::AF::AF3>;
 

@@ -27,31 +27,43 @@
 #include "pinlist.h"
 #include "constDef.h"
 
-// определяет размер строки в значащих символах (без \n)
-template <uint8_t n> uint8_t size (const char ( &string )[n]) { return n - 1; }
+namespace HD44780_HAL {
+    using Channels = DMA_ral::CR_t::Channels;
+    using ChannelDef = ConstDef<Channels>;    
 
-template<class RS,
-         class RW,
-         class E, 
-         class D4,
-         class D5,
-         class D6,
-         class D7,
-         class DMAstream_>
-class HD44780
+    //template<class TIM_, class DMA_, class Pin_> constexpr ChannelDef Channel() { return {Channels::_0, false}; }
+
+    //template<> constexpr ChannelDef Channel<TIM1_t,1>()  { return {1, true}; }
+
+}
+
+
+template <class RS,
+          class RW,
+          class E, 
+          class D4,
+          class D5,
+          class D6,
+          class D7,
+          class TIM_,
+          class DMAstream_
+> class HD44780
 {
 public:
 
-    HD44780() { }
+    HD44780()
+    {
+        init();
+    }
 
 
     // устанавливает string в строке LineN LCD
     // если размер string меньше размера строки LCD
     // заполняет до конца пробелами
-    template <uint8_t size>
-    void setLine (const char ( &string )[size], uint8_t LineN)
+    template <uint8_t n>
+    void setLine (const char ( &string )[n], uint8_t LineN)
     {
-        setStringForDMA (string, size, LineN);
+        setLineForDMA (string, n - 1, LineN);
     }
 
 
@@ -64,6 +76,7 @@ private:
     static const uint8_t CharQty = 80;
     uint32_t data [CharQty*2];
     uint32_t* pData;
+    //PWM<TIM_,E> pwm;
 
 
     // заполняет массив для dma на 1 символ 
@@ -77,9 +90,11 @@ private:
 
     // заполняет массив для dma на строку до size, после size пробелы до
     // конца экрана
-    void setStringForDMA (const char* string, uint8_t size, uint8_t LineN) {
+    void setLineForDMA (const char* string, uint8_t size, uint8_t LineN)
+    __attribute__((noinline))
+    {
         pData = (LineN == 0) ? data : data + CharQty;
-        for (uint8_t i = 0; i < size - 1; ++i) {
+        for (uint8_t i = 0; i < size; ++i) {
             switch ( string[i] ) {
                 // цифры
                 case '0': setCharForDMA<0x30>(); break;
@@ -224,12 +239,54 @@ private:
                 default: setCharForDMA<0x20>(); break; // пробел
 
             }
-            pData++;
+            pData = pData + 2;
         } // for
-        for (uint8_t i = size - 1; i < 16; ++i) {
-            setCharForDMA<0x20>(); break; // пробел
-            pData++;
+        for (uint8_t i = size; i < 16; ++i) {
+            setCharForDMA<0x20>(); // пробел
+            pData = pData + 2;
         }
+    }
+
+
+    void init()
+    {
+        RS::Port::ClockEnable();
+        RS::Configure ( RS::Mode::OutputMode,
+                        RS::OutType::PushPull,
+                        RS::OutSpeed::Low,
+                        RS::PullResistor::No
+        );
+        RW::Port::ClockEnable();
+        RW::Configure ( RW::Mode::OutputMode,
+                        RW::OutType::PushPull,
+                        RW::OutSpeed::Low,
+                        RW::PullResistor::No
+        );
+        D4::Port::ClockEnable();
+        D4::Configure ( D4::Mode::OutputMode,
+                        D4::OutType::PushPull,
+                        D4::OutSpeed::Low,
+                        D4::PullResistor::No
+        );
+        D5::Configure ( D5::Mode::OutputMode,
+                        D5::OutType::PushPull,
+                        D5::OutSpeed::Low,
+                        D5::PullResistor::No
+        );
+        D6::Configure ( D6::Mode::OutputMode,
+                        D6::OutType::PushPull,
+                        D6::OutSpeed::Low,
+                        D6::PullResistor::No
+        );
+        D7::Configure ( D7::Mode::OutputMode,
+                        D7::OutType::PushPull,
+                        D7::OutSpeed::Low,
+                        D7::PullResistor::No
+        );
+
+        // таймер
+        //pwm.setFreq(100000);
+        //pwm.setD(50);
     }
     
 };

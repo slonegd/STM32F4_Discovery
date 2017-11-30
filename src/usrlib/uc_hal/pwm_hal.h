@@ -50,6 +50,26 @@ namespace PWM_HAL {
     template<> constexpr PWM_HAL::ChannelDef Channel<TIM4_t,PD13>() { return {2, true}; }
     template<> constexpr PWM_HAL::ChannelDef Channel<TIM4_t,PD14>() { return {3, true}; }
     template<> constexpr PWM_HAL::ChannelDef Channel<TIM4_t,PD15>() { return {4, true}; }
+
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM5_t,PA0>()  { return {1, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM5_t,PA1>()  { return {2, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM5_t,PA2>()  { return {3, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM5_t,PA3>()  { return {4, true}; }
+
+
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM8_t,PA5>()  { return {1, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM8_t,PA7>()  { return {1, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM8_t,PB0>()  { return {2, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM8_t,PB1>()  { return {3, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM8_t,PB14>() { return {2, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM8_t,PB15>() { return {3, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM8_t,PC6>()  { return {1, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM8_t,PC7>()  { return {2, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM8_t,PC8>()  { return {3, true}; }
+    template<> constexpr PWM_HAL::ChannelDef Channel<TIM8_t,PC9>()  { return {4, true}; }
+
+ 
+
 }
 
 
@@ -85,6 +105,25 @@ public:
         Timer::template SetCompareValue <channel> (countTo * d / 100);
     }
 
+    // номер канала таймера
+    static const uint8_t channel = PWM_HAL::Channel<Timer,Pin>().val;
+
+    void init (void)
+    {
+        Pin::Port::ClockEnable();
+        Timer::ClockEnable();
+
+        Pin::Configure ( Pin::Mode::AlternateMode,
+                         Pin::OutType::PushPull,
+                         Pin::OutSpeed::High,
+                         Pin::PullResistor::No);
+        Pin::template SetAltFunc <Timer::AltFunc> ();
+         
+        Timer::template SetCompareMode <Timer::CompareMode::PWMmode, channel> ();
+        Timer::AutoReloadEnable();
+        Timer::CounterEnable();
+    }
+
 private:
     // частота в Гц
     uint16_t freq;
@@ -92,23 +131,9 @@ private:
     uint16_t d;
     // таймер считает до, зависит от частоты
     uint32_t countTo;
-    // номер канала таймера
-    static const uint8_t channel = PWM_HAL::Channel<Timer,Pin>().val;
 
-    void init (void)
-    {
-        Pin::Port::ClockEnable();
-        Pin::Configure ( Pin::Mode::AlternateMode,
-                         Pin::OutType::PushPull,
-                         Pin::OutSpeed::High,
-                         Pin::PullResistor::No);
-        Pin::template SetAltFunc <Timer::AltFunc> ();
-         
-        Timer::ClockEnable();
-        Timer::AutoReloadEnable();
-        Timer::template SetCompareMode <Timer::CompareMode::PWMmode, channel> ();
-        Timer::CounterEnable();
-    }
+
+
 };
 
 
